@@ -1,0 +1,4 @@
+AML
+===
+
+A Mazing Language
