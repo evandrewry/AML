@@ -1,0 +1,151 @@
+\documentclass[12pt]{article}
+\usepackage{geometry} 
+\usepackage{enumerate}
+\usepackage{listings}
+\geometry{letterpaper} 
+
+
+\title{AML - LANGUAGE REFERENCE MANUAL}
+
+\date{29 October 2012} 
+
+\author{
+    Evan Drewry - ewd2106
+    \and
+    Nikhil Heferty - nh2407
+    \and
+    Sriramkumar Balasubramanian - sb3457
+    \and
+    Timothy Giel - tkg2104
+}
+
+
+\begin{document}
+
+\maketitle
+
+
+%SECTION 2 - Lexical Conventions
+\section{Lexical Conventions}
+A program consists of a single translation unit stored as a file. There are five classes of tokens: identifiers, keywords, constants, operators, and other separators. White space (blanks, tabs, newlines, form feeds, etc.) and comments are ignored except as they separate tokens. Some white space is required to separate adjacent identifiers, keywords, and constants.
+
+\subsection{Comments}
+The characters \lstinline$/*$ introduce a comment, and the characters \lstinline$*/$ terminate a comment. Comments do not nest.
+
+\subsection{Identifiers}
+An identifier is a sequence of letters and digits, beginning with a letter. The only special character allowed is an underscore (\lstinline{_}), and this is counted as a letter. AML is case sensitive. Identifiers can be of any length.
+
+\subsection{Keywords}
+The following identifiers are reserves for use as keywords, and may not be used otherwise:
+\begin{lstlisting}
+        if
+        then
+        else
+        function
+        exit
+        return
+\end{lstlisting}
+
+\subsection{Constants}
+There are several kinds of constants: integer, boolean, and null. An integer constant is taken to be decimal, and is of data type Integer. It may consist only of digits 0-9. A boolean constant is either \lstinline{T} or \lstinline{F}, for True and False, and is of data type Boolean. The null constant has no data type and is simply the word \lstinline{null}.
+
+
+%SECTION 3 - Expressions
+\section{Expressions}
+\subsection{Primary Expressions}
+Primary expressions are identifiers, constants, or expressions in parentheses.
+\begin{lstlisting}
+    primary-expression:
+        identifier
+        constant
+        ( expression )	
+\end{lstlisting}
+An identifier is a primary expression, provided it has been declared. Type is specified in the declaration.
+A constant is a primary expression. Its type depends on its form, and is either \lstinline{T}, \lstinline{F}, or an integer.
+
+\subsection{Operators}
+\subsubsection{Arithmetic Operators}
+There are six arithmetic operators: \lstinline{+}, \lstinline{-}, \lstinline{*}, \lstinline{/}, \lstinline{%}, \lstinline{^}. The operands of these operators must be of Integer data type. The result will also be of type Integer.
+
+\begin{lstlisting}
+    arithmetic-expression:
+        primary-expression
+        arithmetic-expression + arithmetic-expression
+        arithmetic-expression - arithmetic-expression
+        arithmetic-expression * arithmetic-expression
+        arithmetic-expression / arithmetic-expression
+        arithmetic-expression % arithmetic-expression
+        arithmetic-expression ^ arithmetic-expression
+\end{lstlisting}
+
+The binary \lstinline{+} operator denotes addition.
+
+The binary \lstinline{-} operator denotes subtraction.
+
+The binary \lstinline{*} operator denotes multiplication.
+
+The binary \lstinline{/} operator denotes division.
+
+The binary \lstinline{%} operator denotes modulo.
+
+The binary \lstinline{^} operator denotes exponentiation.
+
+\subsubsection{Relational Operators}
+The relational operators all return values of Boolean type (either True or False). There are six relational operators:  \lstinline{==}, \lstinline{!=}, \lstinline{>}, \lstinline{<}, \lstinline{>=}, \lstinline{<=}. The operators  all yield \lstinline{F} if the specified relation is false and \lstinline{T} if it is true.
+\begin{lstlisting}
+    relational-expression:
+        arithmetic-expression
+        arithmetic-expression == arithmetic-expression
+        arithmetic-expression != arithmetic-expression
+        arithmetic-expression > arithmetic-expression
+        arithmetic-expression < arithmetic-expression
+        arithmetic-expression >= arithmetic-expression
+        arithmetic-expression <= arithmetic-expression
+\end{lstlisting}
+
+The binary \lstinline{==} operator denotes addition.
+
+The binary \lstinline{!=} operator denotes subtraction.
+
+The binary \lstinline{>} operator denotes multiplication.
+
+The binary \lstinline{<} operator denotes division.
+
+The binary \lstinline{>=} operator denotes modulo.
+
+The binary \lstinline{<=} operator denotes exponentiation.
+
+\subsubsection{Boolean Operators}
+The boolean operators all return values of Boolean type (either True or False). There are three boolean operators: logical-NOT, logical-AND and logical-OR, denoted by \lstinline{not}, \lstinline{and},  and \lstinline{or}, respectively.
+\paragraph{Logical NOT operator}
+The logical-NOT operator is unary and takes a Boolean data type as input and outputs the logical opposite, also of Boolean type.
+\begin{lstlisting}
+    logical-NOT-expression:
+        relational-expression
+        not logical-NOT-expression
+\end{lstlisting}
+\paragraph{Logical AND operator}
+The logical-AND and logical-OR operators are binary and take two inputs of Boolean data type, and both return a Boolean as well. The logical-AND operator returns T if both operands compare equal to T, and F otherwise.
+\begin{lstlisting}
+    logical-AND-expression:
+        logical-NOT-expression
+        logical-AND-expression and logical-NOT-expression
+\end{lstlisting}
+\paragraph{Logical OR operator}
+The logical-OR operator returns T if either of its operands compare equal to T, and F otherwise.
+\begin{lstlisting}
+    logical-OR-expression:
+        logical-AND-expression
+        logical-OR-expression or logical-AND-expression
+\end{lstlisting}
+
+\subsubsection{Assignment Operators}
+There is a single assignment operator in AML, \lstinline{:=}, which does simple assignment. An lvalue is required as the left operand, and the lvalue must be modifiable. The simple assignment operator replaces the value of the object referred to by lvalue with the value of the expression on the right hand side.
+\begin{lstlisting}
+   assignment-expression:
+        logical-OR-expression
+        primary-expression := assignment-expression
+\end{lstlisting}
+
+
+\end{document}
