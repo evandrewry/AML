@@ -81,7 +81,7 @@ not be used otherwise:-\\
 \begin{tabular}{ccccccc}
 if & return & display & remove & left & hasleft & Integer\tabularnewline
 then & main & print & add & right  & hasright & Boolean\tabularnewline
-else & void & source & head & up  & hastop & List<datatype>\tabularnewline
+else & void & source & head & up  & hastop & List\tabularnewline
 load & function & visited & next & down & hasbottom & Cell\tabularnewline
 random & exit & isTarget & isEmpty & CPos &  & \tabularnewline
 True & null & NOT & AND &  &  & \tabularnewline
@@ -124,10 +124,12 @@ The list literal can include either the Integer, Boolean, Cell or
 List<datatype> types (cascaded lists). \\
 eg. <{[}1{]}>,<{[}1,2,3{]}>,<{[}{[}1,2,3{]},{[}4,5{]}>,<{[}True, False,
 True{]}>\\
-\\
-The Cell datatype does not have any literals associated with it. It
-can only be assigned to the CPos variable which will be discussed
-in section \ref{sec:Implicit-variables-and}. \\
+.\\
+As can be seen above the List literals consist of the form List<Integer>,
+List<List<....<List<Integer>\textcompwordmark{}>...>\textcompwordmark{}>,
+List<Boolean> or List<List ... <List <Boolean>\textcompwordmark{}>
+... >\textcompwordmark{}>. Details on List<datatype> and Cell datatypes
+are provided in section \ref{sec:Implicit-variables-and}. \\
 
 
 
@@ -136,10 +138,55 @@ in section \ref{sec:Implicit-variables-and}. \\
 The semi-colon \textbf{; }and the pair of braces \textbf{\{ \} },
 the < > and {[} {]}, act as separators of the tokens. They are meant
 to reduce ambiguity and conflicts during the parsing phase. The semi-colon
-is added at the end of every statement to signify the end. The \{
-\} are used to collect groups of statements into a single compound
-statement block. The < > and {[} {]} are used to instantiate the List<datatype>
-variables.
+is added at the end of every statement to signify the end of the logical
+statement. The \{ \} are used to collect groups of statements into
+a single compound statement block. The < > and {[} {]} are used to
+instantiate the List<datatype> variables.
+
+
+\section{Syntax Notation}
+
+In all of the syntactic notation used in this manual, the non-terminal
+symbols are denoted in \textit{italics}, and literal words and characters
+in \textbf{bold. }Alternative symbols are listed on separate lines.
+An optional terminal or non-terminal symbol is indicated by subscripting
+it with 'opt'. \\
+eg. \textit{expression\textsubscript{opt}}denotes an optional expression
+
+
+\section{Identifier interpretation}
+
+aML interprets the identifier based on it's type. Each identifier
+has a storage associated with it where a certain value is stored.
+The type of the identifier determines the meaning of the values located
+in the storage of the identifier. In aML each identifier's storage
+exists as long as the block enclosing the identifier is being executed.\\
+aML supports a 3 fundamental types:-\\
+
+\begin{itemize}
+\item Integer - Objects declared as Integers use 64 bits for storage and
+are signed. They are primarily used for arithmetic operations.
+\item Boolean - Objects declared as Booleans act as binary variables and
+can either take the value \textbf{True} or \textbf{False}.
+\item Cell - A cell object stores the attributes of a cell of a maze.
+\end{itemize}
+There is one derived type List<type> which is used for storing lists
+of objects of the fundamental types as well as the List type. By this
+recursive definition, aML allows cascading of these lists.\\
+ More details on the Cell and List<type> datatypes is provided in
+section \ref{sec:Types-revisited}.\\
+\\
+The complete data type definitions present in aML are as follows:-\\
+\textit{}\\
+\textit{datatype:-}\textbf{}\\
+\textbf{\hspace*{0.5cm}Integer}\\
+\textbf{\hspace*{0.5cm}Boolean}\\
+\textbf{\hspace*{0.5cm}Cell}\\
+\textbf{\hspace*{0.5cm}List<}\textit{dataty}\\
+\\
+\textbf{Note:- }Each datatype is different from each other and no
+two different datatypes can be combined together in a valid operation
+defined in aML.
 
 
 \section{Expressions}
@@ -155,17 +202,27 @@ Primary expressions are identifiers, constants, or expressions in
 parentheses. They also include the variable CPos which will be explained
 in section \ref{sec:Types-revisited}.\\
 \textbf{}\\
-\textbf{primary-expression:-}\\
-\textbf{\hspace*{0.5cm}identifier}\\
-\textbf{\hspace*{0.5cm}literal }\\
-\textbf{\hspace*{0.5cm}( expression )}\\
-\textbf{\hspace*{0.5cm}(CPos)}\\
+\textit{primary-expression:-}\\
+\textit{\hspace*{0.5cm}identifier}\\
+\textit{\hspace*{0.5cm}literal }\\
+\textit{\hspace*{0.5cm}}( \textit{expression }\textbf{)}\textbf{\textit{}}\\
+\textit{\hspace*{0.5cm}}\textbf{(CPos)}\textit{}\\
+\textit{\hspace*{0.5cm}}\textbf{null}\\
  \\
-A paranthesized expression is equivalent to the expression without
-the parantheses. The parantheses is used to group terms especially
-to enforce precedence levels. CPos is the implicit variable denoting
-the current position of the bot on the maze. It is mostly used to
-assign to variables of Cell datatype.
+An identifier is a primary expression provided it's type is specified
+in it's declaration.\\
+A literal is a primary expression. The type of the literal may include
+Integer, Boolean or List<type>. The syntax notation for literal including
+the definition of list literals is given in detail in section \ref{sec:Syntax-summary}.
+\\
+A paranthesized expression is a primary expression whose type and
+value are equal to those of the non-paranthesized one. \\
+CPos refers to the current position of the bot in the maze. It is
+a tracking variable and is used primarily to assign values to identifiers
+of Cell datatypes. \\
+null is a constant which is assigned by default to identifiers of
+the List<type> and Cell datatypes. It signifies no storage allotted
+to the identifier yet.
 
 
 \subsection{Operators}
@@ -177,13 +234,13 @@ There are six arithmetic operators:\{ +, -, {*}, /, \%, \textasciicircum{}\}.
 The operands of these operators must be of Integer data type. The
 result will also be of type Integer.\\
 \textbf{}\\
-\textbf{arithmetic-expression:-}\\
-\textbf{\hspace*{0.5cm}expression + expression }\\
-\textbf{\hspace*{0.5cm}expression - expression }\\
-\textbf{\hspace*{0.5cm}expression {*} expression }\\
-\textbf{\hspace*{0.5cm}expression / expression }\\
-\textbf{\hspace*{0.5cm}expression \% expression }\\
-\textbf{\hspace*{0.5cm}expression \textasciicircum{} expression }\\
+\textit{arithmetic-expression:-}\\
+\textit{\hspace*{0.5cm}expression + expression }\\
+\textit{\hspace*{0.5cm}expression - expression }\\
+\textit{\hspace*{0.5cm}expression {*} expression }\\
+\textit{\hspace*{0.5cm}expression / expression }\\
+\textit{\hspace*{0.5cm}expression \% expression }\\
+\textit{\hspace*{0.5cm}expression \textasciicircum{} expression }\\
 \\
 \begin{tabular}{|c|c|c|}
 \hline 
@@ -214,13 +271,13 @@ True or False). There are six relational operators: \{==, \textasciitilde{}=,
 >, <, >=, <=\}. The operators all yield \textbf{False} if the specified
 relation is false and \textbf{True} if it is true. \\
 \textbf{}\\
-\textbf{relational-expression:-}\\
-\textbf{\hspace*{0.5cm}expression == expression}\\
-\textbf{\hspace*{0.5cm}expression \textasciitilde{}= expression}\\
-\textbf{\hspace*{0.5cm}expression > expression}\\
-\textbf{\hspace*{0.5cm}expression < expression}\\
-\textbf{\hspace*{0.5cm} expression >= expression}\\
-\textbf{\hspace*{0.5cm}expression <= expression}\\
+\textit{relational-expression:-}\\
+\textit{\hspace*{0.5cm}expression}\textbf{\textit{ }}\textbf{== }\textit{expression}\\
+\textit{\hspace*{0.5cm}expression}\textbf{ \textasciitilde{}= }\textit{expression}\\
+\textit{\hspace*{0.5cm}expression}\textbf{ > }\textit{expression}\\
+\textit{\hspace*{0.5cm}expression}\textbf{ < }\textit{expression}\\
+\textit{\hspace*{0.5cm} expression}\textbf{ >= }\textit{expression}\\
+\textit{\hspace*{0.5cm}expression}\textbf{ <= }\textit{expression}\\
 \\
 \begin{tabular}{|c|c|}
 \hline 
@@ -260,12 +317,12 @@ The boolean operators all return values of Boolean type (either True
 or False). There are three boolean operators: logical-NOT, logical-AND
 and logical-OR, denoted by NOT, AND, and OR, respectively. \\
 \textbf{}\\
-\textbf{Not-expression:-}\\
-\textbf{\hspace*{0.5cm}NOT expression}\\
-\textbf{And-expression:-}\\
-\textbf{\hspace*{0.5cm}expression AND expression}\\
-\textbf{Or-expression:-}\\
-\textbf{\hspace*{0.5cm}expression OR expression}\\
+\textit{not-expression:-}\\
+\textit{\hspace*{0.5cm}}\textbf{NOT}\textit{ expression}\\
+\textit{and-expression:-}\\
+\textit{\hspace*{0.5cm}expression }\textbf{AND}\textit{ expression}\\
+\textit{or-expression:-}\\
+\textit{\hspace*{0.5cm}expression }\textbf{OR}\textit{ expression}\\
 \\
 The operand(s) to NOT, AND and OR have to evaluate to True or False,
 or in other words, they must either be Boolean variables or relational
@@ -277,9 +334,13 @@ of the operands evaluate to true, False otherwise.
 \subsubsection{Assignment Operators}
 
 There is a single assignment operator in aML, \textbf{:=,} which does
-simple assignment. It is a binary operator and it's usage is described
-in section\ref{sub:Variable-Initialization}.\\
-
+simple assignment. It is a binary operator which assigns the value
+of the right operand to the storage of the left operand.\\
+\\
+\textit{assignment-expression:-}\\
+\textit{\hspace*{0.5cm}identifier }\textbf{:=}\textit{ expression}\\
+\textit{}\\
+The type of the expression must be identical to the type of 'lvalue'.
 
 
 \subsubsection{Associative Operator}
@@ -293,47 +354,59 @@ is shown in section\ref{sec:Syntax-summary}.
 
 Declarations specify the interpretation given to each identifier i.e.
 the type of data it can point to and the associated operations that
-go along with it.
+go along with it. Declarations can be divided into variable and function
+declarations. Variable declarations refers to the declaration of identifiers
+whose type belongs to one of the datatypes mentioned and is different
+from function declarations both syntactically and semantically.
 
 
 \subsection{Variable Declarations\label{sub:Variable-Declarations}}
 
-The data types present are defined as follows:-\\
-\textbf{datatype:-}\\
-\textbf{\hspace*{0.5cm}Integer}\\
-\textbf{\hspace*{0.5cm}Boolean}\\
-\textbf{\hspace*{0.5cm}Cell}\\
-\textbf{\hspace*{0.5cm}List<datatype>}\\
+The rule representing the declaration of identifiers is listed in
+the complete Syntax summary in section \ref{sec:Syntax-summary}.
+The declaration of identifiers is similar to many strongly typed languages
+where thet type associated with the identifier must be specified during
+declaration. \\
 \\
+\textit{declaration-expression:-}\\
+\textit{\hspace*{0.5cm}datatype declarator}\\
+\textit{}\\
+\textit{declarator:-}\\
+\textit{\hspace*{0.5cm}decl-expression init-expression\textsubscript{opt}}\\
 \\
-The rule representing the declaration of variables is listed in the
-complete Syntax summary in section \ref{sec:Syntax-summary}. The
-declaration of variables is similar to many strongly typed languages
-where thet type of the variable must be specified during declaration.
-Examples of some variable declarations:-
+\textit{decl-expression:-}\\
+\textit{\hspace*{0.5cm}identifier}\\
+\textit{\hspace*{0.5cm}expression}\\
+\\
+Examples of some declarations are given below:-
 \begin{itemize}
 \item Integer x;
 \item Boolean flag;
 \item Cell node;
 \item List<Integer> myList;
 \end{itemize}
-Detailed explanation of the List<datatype> and Cell datatypes are
-provided in section \ref{sec:Types-revisited}.\\
-
-
 
 \subsection{Variable Initialization\label{sub:Variable-Initialization}}
 
-When a variable is declared, an initial value may also be specified
-for the identifier being declared.\\
-Roughly it is of the form - \textbf{lvalue := rvalue;}\\
- The \textbf{:= }operator is used to set the value of lvalue to the
-value of rvalue.
+When an identifier is declared, an initial value may also be specified.
+Else the identifier can be initalized separately after it's declaration.
+\\
+ \textit{}\\
+\textit{init-expression:-}\\
+\textit{\hspace*{0.5cm}} \textbf{:=} \textit{rvalue-expression}\\
+\\
+\textit{rvalue-expression:-}\\
+\textit{\hspace*{0.5cm}expression}\\
+\textit{\hspace*{0.5cm}identifier}\\
+\textit{\hspace*{0.5cm}literal}\\
+
+
+A few examples of variable initializations are provided below;
 \begin{itemize}
 \item x := 10;
 \item flag := false;
 \item node := null;
-\item myList := <{[}1,2,3{]}>;
+\item myList.head() := 1;
 \end{itemize}
 The exact rule is provided in the Syntax summary in section \ref{sec:Syntax-summary}.
 Initialization can also be combined with declaration in a single step.
@@ -348,26 +421,25 @@ Functions can either return a certain datatype or be void functions
 return type. Functions can be {}``used'' by function calls. But
 for a function to be called, it must be declared in the program.\\
 \\
-\textbf{function\_declaration:-}\\
-\textbf{\hspace*{0.5cm}function\_header \{ body \}}\\
+\textit{function\_declaration:-}\\
+\textit{\hspace*{0.5cm}function\_header}\textbf{ \{ }\textit{body}\textbf{
+\}}\\
 \textbf{}\\
-\textbf{function\_header:-}\\
-\textbf{\hspace*{0.5cm}function identifier (args\_list\textsubscript{\textbf{opt}})
-: ret\_type}\\
-\textbf{}\\
-\textbf{args\_list:-}\\
-\textbf{\hspace*{0.5cm}datatype identifier}\\
-\textbf{\hspace*{0.5cm}datatype identifier,args\_list}\\
-\textbf{}\\
-\textbf{body:-}\\
-\textbf{\hspace*{0.5cm}compound-statement}\\
+\textit{function\_header:-}\\
+\textit{\hspace*{0.5cm}function identifier (args\_list\textsubscript{\textbf{opt}})}\textbf{
+: }\textit{return\_type}\\
+\textit{}\\
+\textit{args\_list:-}\\
+\textit{\hspace*{0.5cm}datatype identifier}\\
+\textit{\hspace*{0.5cm}datatype identifier}\textbf{,}\textit{ args\_list}\\
+\textit{}\\
+\textit{body:-}\\
+\textit{\hspace*{0.5cm}compound-statement}\textbf{}\\
 \textbf{}\\
 \textbf{}\\
 Function calls are handled in section \ref{sec:Syntax-summary}. Compound
 statements are described in detail in the section below.\\
-\textbf{Note: }The subscript 'opt' stands for optional argument indicating
-the term formed by omitting the indicated term is also possible in
-the grammar.
+
 
 
 \section{Statements}
@@ -388,19 +460,20 @@ in section \ref{sec:Syntax-summary}.
 
 \subsection{Expression statement}
 
-\textbf{expression-statement:- }\\
-\textbf{\hspace*{0.5cm}expression; }\\
+\textit{expression-statement:- }\\
+\textit{\hspace*{0.5cm}expression}\textbf{;}\textit{ }\\
 Expression statement consist of assignments and function calls. 
 
 
 \subsection{Compound statements}
 
 Compound statements are provided in the form:-\\
- \textbf{compound-statement:-}\\
-\textbf{\hspace*{0.5cm}\{ statement-list \}}\\
-\textbf{statement-list:-}\\
-\textbf{\hspace*{0.5cm}statement }\\
-\textbf{\hspace*{0.5cm}statement statement-list }\\
+\\
+ \textit{compound-statement:-}\\
+\textit{\hspace*{0.5cm}}\textbf{\{ }\textit{statement-list }\textbf{\}}\textit{}\\
+\textit{statement-list:-}\\
+\textit{\hspace*{0.5cm}statement }\\
+\textit{\hspace*{0.5cm}statement statement-list }\\
 Compound statements are generally used to form the body of code to
 execute in conditional statements, as well as the body of function
 definitions.
@@ -409,10 +482,12 @@ definitions.
 \subsection{Conditional statements}
 
 Conditional statements have the general form:-\\
- \textbf{conditional-statement:-}\\
-\textbf{\hspace*{0.5cm}if (expression) then \{compound-statement\};}\\
-\textbf{\hspace*{0.5cm}if (expression) then \{compound-statement\}else
-\{compound statement\}}\\
+\\
+ \textit{conditional-statement:-}\textbf{}\\
+\textbf{\hspace*{0.5cm}if }\textit{(expression)}\textbf{ then \{}\textit{compound-statement}\textbf{\};}\\
+\textbf{\hspace*{0.5cm}if (}\textit{expression}\textbf{) then \{}\textit{compound-statement}\textbf{\}else
+\{}\textit{compound statement}\textbf{\}}\\
+\\
  The else branch is optional. The program will evaluate the expression
 in parentheses, and if it evaluates to the Boolean value true then
 it executes the corresponding compound-statement, and subsequently
@@ -426,8 +501,8 @@ that evaluates to true will be executed, and all others skipped.
 \subsection{Return statement}
 
 Return statement Return statements take the form:-\\
-\textbf{return-statement:- }\\
-\textbf{\hspace*{0.5cm}return expression};\\
+\textit{return-statement:- }\\
+\textit{\hspace*{0.5cm}}\textbf{return }\textit{expression}\textbf{;}\\
 The expression should evaluate to a value of the return type of the
 function being defined. 
 
@@ -451,8 +526,9 @@ variables is provided in \ref{sec:Implicit-variables-and}.
 Preprocessor directives must precede any code in the program. One
 possible preprocessor directive takes the form: \textbf{\#load filename}.
 This instruction ensures that the maze to be navigated is to be generated
-from the file. The acceptable file format is pre-defined and is independent
-of the language used. \\
+from the file with name \textbf{filename}. (The file must be placed
+in the 'maps' directory). The acceptable file format is pre-defined
+and is independent of the language used. \\
 Another possible directive is: \textbf{\#load-random}. This leads
 to the maze is to be randomly generated each time the program runs.
 \\
@@ -460,10 +536,15 @@ The two directives are mutually exclusive. In the event of multiple
 directives, the compiler will show an error. 
 
 
-\section{Implicit variables and functions\label{sec:Implicit-variables-and}}
+\section{Implicit identifiers and functions\label{sec:Implicit-variables-and}}
 
-aML consists of many implicit variables and functions. The variables
-and functions along with their meaing are provided below:-\\
+aML consists of many implicit identifers or variables and functions.
+By implicit, it follows that these identifiers can be used without
+prior declaration as is the case for any user defined identifier or
+function. However they cannot be modified by the user. Their usage
+is mostly restricted to boolean queries and assigning their values
+to user-defined identifiers. The variables and functions along with
+their meaing are provided below:-\\
 
 
 
@@ -585,31 +666,66 @@ exact copy of the language.\\
 
 The expression includes declaration statements as well.\\
 \\
-\textbf{expression:-}\\
-\textbf{\hspace*{0.5cm}primary\_expression}\\
-\textbf{\hspace*{0.5cm}lval\_expression}\\
-\textbf{\hspace*{0.5cm}NOT expression}\\
-\textbf{\hspace*{0.5cm}expression binop expression}\\
-\textbf{\hspace*{0.5cm}functions}\\
+\textit{expression:-}\\
+\textit{\hspace*{0.5cm}primary\_expression}\\
+\textit{\hspace*{0.5cm}lval\_expression}\textbf{}\\
+\textbf{\hspace*{0.5cm}NOT }\textit{expression}\\
+\textit{\hspace*{0.5cm}expression binop expression}\\
+\textit{\hspace*{0.5cm}functions}\\
+\textit{}\\
+\textit{primary-expression:-}\\
+\textit{\hspace*{0.5cm}identifier}\\
+\textit{\hspace*{0.5cm}literal }\\
+\textit{\hspace*{0.5cm}}( \textit{expression }\textbf{)}\textbf{\textit{}}\\
+\textit{\hspace*{0.5cm}}\textbf{(CPos)}\textit{}\\
+\textit{\hspace*{0.5cm}}\textbf{null}\\
+\textbf{}\\
+\textit{literal:-}\\
+\textit{\hspace*{0.5cm}primitive\_literal}\\
+\textit{\hspace*{0.5cm}}\textbf{<{[}}\textit{list\_literal\textsubscript{opt}}\textbf{{]}>}\textit{}\\
+\textit{}\\
+\textit{primitive\_literal:-}\\
+\textit{\hspace*{0.5cm}integer\_literal}\\
+\textit{\hspace*{0.5cm}boolean\_literal}\\
+\textit{}\\
+\textit{list\_literal:-}\\
+\textit{\hspace*{0.5cm}sub\_list}\\
+\textit{\hspace*{0.5cm}}\textbf{{[}}\textit{list\_literal}\textbf{{]}}\textit{}\\
+\textit{\hspace*{0.5cm}list\_literal,}\textbf{{[}}\textit{sub\_list}\textbf{{]}}\textit{}\\
+\textit{}\\
+\textit{sub\_list:-}\\
+\textit{\hspace*{0.5cm}primitive\_literal}\\
+\textit{\hspace*{0.5cm}primitive\_literal,sub\_list}\\
+\textbf{}\\
+\textit{lval\_expression:-}\\
+\textit{\hspace*{0.5cm}declaration-expression}\textbf{}\\
+\textbf{\hspace*{0.5cm}}\textit{declarator}\textbf{}\\
+\textbf{}\\
+\textit{declaration-expression:-}\\
+\textit{\hspace*{0.5cm}datatype declarator}\\
+\textit{}\\
+\textit{declarator:-}\\
+\textit{\hspace*{0.5cm}decl-expression init-expression\textsubscript{opt}}\\
 \\
-\textbf{primary-expression:-}\\
-\textbf{\hspace*{0.5cm}identifier}\\
-\textbf{\hspace*{0.5cm} literal }\\
-\textbf{\hspace*{0.5cm} ( expression )}\\
-\textbf{\hspace*{0.5cm}(CPos)}\\
+\textit{decl-expression:-}\\
+\textit{\hspace*{0.5cm}identifier}\\
+\textit{\hspace*{0.5cm}expression}\textbf{}\\
 \textbf{}\\
-\textbf{lval\_expression:-}\\
-\textbf{\hspace*{0.5cm}identifier := expression}\\
-\textbf{\hspace*{0.5cm}datatype identifer := expression}\\
-\textbf{\hspace*{0.5cm}datatype identifer}\\
+\textit{init-expression:-}\\
+\textit{\hspace*{0.5cm}} \textbf{:=} \textit{rvalue-expression}\\
+\\
+\textit{rvalue-expression:-}\\
+\textit{\hspace*{0.5cm}expression}\\
+\textit{\hspace*{0.5cm}identifier}\\
+\textit{\hspace*{0.5cm}literal}\textbf{}\\
 \textbf{}\\
-\textbf{datatype:-}\\
+\textit{datatype:-}\textbf{}\\
 \textbf{\hspace*{0.5cm}Integer}\\
 \textbf{\hspace*{0.5cm}Boolean}\\
 \textbf{\hspace*{0.5cm}Cell}\\
-\textbf{\hspace*{0.5cm}List<datatype>}\\
+\textbf{\hspace*{0.5cm}List<}\textit{datatype}\textbf{>}\\
 \textbf{}\\
-\textbf{binop:-}\\
+\textit{binop:-}\textbf{}\\
 
 
 \begin{tabular}{|cccc|c|}
@@ -639,43 +755,43 @@ The binop table shows the binary operators in the decreasing order
 of precedence (top - bottom) along with their associativity which
 gives the fashion in which they are grouped together.\\
 \\
-\textbf{functions:-}\\
-\textbf{\hspace*{0.5cm}list\_functions}\\
-\textbf{\hspace*{0.5cm}cell\_functions}\\
-\textbf{\hspace*{0.5cm}maze\_functions}\\
-\textbf{\hspace*{0.5cm}lang\_functions}\\
+\textit{functions:-}\\
+\textit{\hspace*{0.5cm}list\_functions}\\
+\textit{\hspace*{0.5cm}cell\_functions}\\
+\textit{\hspace*{0.5cm}maze\_functions}\\
+\textit{\hspace*{0.5cm}lang\_functions}\\
+\textit{}\\
+\textit{list\_functions:-}\textbf{}\\
+\textbf{\hspace*{0.5cm}}\textit{expression}\textbf{.add(}\textit{expression}\textbf{)}\\
+\textbf{\hspace*{0.5cm}}\textit{expression}\textbf{.remove()}\\
+\textbf{\hspace*{0.5cm}}\textit{expression}\textbf{.isEmpty()}\\
+\textbf{\hspace*{0.5cm}}\textit{expression}\textbf{.head()}\\
+\textbf{\hspace*{0.5cm}}\textit{expression}\textbf{.next()}\\
 \textbf{}\\
-\textbf{list\_functions:-}\\
-\textbf{\hspace*{0.5cm}identifier.add(expr)}\\
-\textbf{\hspace*{0.5cm}identifier.remove()}\\
-\textbf{\hspace*{0.5cm}identifier.isEmpty()}\\
-\textbf{\hspace*{0.5cm}identifier.head()}\\
-\textbf{\hspace*{0.5cm}identifier.next()}\\
+\textit{cell\_functions:-}\textbf{}\\
+\textbf{\hspace*{0.5cm}}\textit{expression}\textbf{.left()}\\
+\textbf{\hspace*{0.5cm}}\textit{expression}\textbf{.right()}\\
+\textbf{\hspace*{0.5cm}}\textit{expression}\textbf{.up()}\\
+\textbf{\hspace*{0.5cm}}\textit{expression}\textbf{.down()}\\
+\textbf{\hspace*{0.5cm}}\textit{expression}\textbf{.hasleft()}\\
+\textbf{\hspace*{0.5cm}}\textit{expression}\textbf{.hasright()}\\
+\textbf{\hspace*{0.5cm}}\textit{expression}\textbf{.hastop()}\\
+\textbf{\hspace*{0.5cm}}\textit{expression}\textbf{.hasbottom()}\\
+\textbf{\hspace*{0.5cm}}\textit{expression}\textbf{.isTarget()}\\
 \textbf{}\\
-\textbf{cell\_functions:-}\\
-\textbf{\hspace*{0.5cm}identifier.left()}\\
-\textbf{\hspace*{0.5cm}identifier.right()}\\
-\textbf{\hspace*{0.5cm}identifier.up()}\\
-\textbf{\hspace*{0.5cm}identifier.down()}\\
-\textbf{\hspace*{0.5cm}identifier.hasleft()}\\
-\textbf{\hspace*{0.5cm}identifier.hasright()}\\
-\textbf{\hspace*{0.5cm}identifier.hastop()}\\
-\textbf{\hspace*{0.5cm}identifier.hasbottom()}\\
-\textbf{\hspace*{0.5cm}identifier.isTarget()}\\
-\textbf{}\\
-\textbf{maze\_functions:-}\\
-\textbf{\hspace*{0.5cm}Visit(identifier)}\\
-\textbf{\hspace*{0.5cm}get\_Loc(identifier)}\\
+\textit{maze\_functions:-}\\
+\textit{\hspace*{0.5cm}}\textbf{Visit}(\textit{expression}\textbf{)}\\
+\textbf{\hspace*{0.5cm}get\_Loc(}\textit{expression}\textbf{)}\\
 \textbf{\hspace*{0.5cm}revert()}\\
 \textbf{}\\
-\textbf{lang\_functions:-}\\
-\textbf{\hspace*{0.5cm}identifier(actual\_args\textsubscript{\textbf{opt}})}\\
+\textit{lang\_functions:-}\\
+\textit{\hspace*{0.5cm}identifier}\textbf{(}\textit{actual\_args\textsubscript{\textbf{opt}}}\textbf{)}\\
 \textbf{\hspace*{0.5cm}display()}\\
-\textbf{\hspace*{0.5cm}print(identifier)}\\
+\textbf{\hspace*{0.5cm}print(}\textit{expression}\textbf{)}\\
 \textbf{}\\
-\textbf{actual\_args:-}\\
-\textbf{\hspace*{0.5cm}primary\_expression}\\
-\textbf{\hspace*{0.5cm}primary\_expression, actual\_args}\\
+\textit{actual\_args:-}\\
+\textit{\hspace*{0.5cm}primary\_expression}\\
+\textit{\hspace*{0.5cm}primary\_expression}\textbf{, }\textit{actual\_args}\textbf{}\\
 \textbf{}\\
 
 
@@ -688,16 +804,18 @@ fashion one after the other.\\
 \textbf{compound-statement:-}\\
 \textbf{\hspace*{0.5cm}\{statement-list\}}\\
 \textbf{}\\
-\textbf{statement-list:-}\\
-\textbf{\hspace*{0.5cm}statement}\\
-\textbf{\hspace*{0.5cm}statement statement-list}\\
-\textbf{}\\
-\textbf{statement:-}\\
-\textbf{\hspace*{0.5cm}expression;}\\
-\textbf{\hspace*{0.5cm}return expr;}\\
-\textbf{\hspace*{0.5cm}\{ statement-list \}}\\
-\textbf{\hspace*{0.5cm}if (expression) statement;}\\
-\textbf{\hspace*{0.5cm}if (expression) statement else statement}\\
+\textit{statement-list:-}\\
+\textit{\hspace*{0.5cm}statement}\\
+\textit{\hspace*{0.5cm}statement statement-list}\\
+\textit{}\\
+\textit{statement:-}\textbf{}\\
+\textbf{\hspace*{0.5cm}}\textit{expression}\textbf{;}\\
+\textbf{\hspace*{0.5cm}return }\textit{expression}\textbf{;}\\
+\textbf{\hspace*{0.5cm}\{ }\textbf{\textit{statement-list}}\textbf{
+\}}\\
+\textbf{\hspace*{0.5cm}if (}\textit{expression}\textbf{) }\textit{statement}\textbf{;}\\
+\textbf{\hspace*{0.5cm}if (}\textit{expression}\textbf{) }\textit{statement}\textbf{
+else }\textit{statement}\textbf{}\\
 \textbf{\hspace*{0.5cm}exit;}\\
 \textbf{}\\
 \\
@@ -714,26 +832,26 @@ the program. It must also have exactly one pre-processor directive
 to load the maze. It can have an arbitrary number of functions though.
 The program structure is defined below:-\\
 \\
-\textbf{program:-}\\
-\textbf{\hspace*{0.5cm}empty\_program}\\
-\textbf{\hspace*{0.5cm}pre-process program}\\
-\textbf{\hspace*{0.5cm}func-def program}\\
-\textbf{}\\
-\textbf{empty-program:- }\\
-\textbf{\hspace*{0.5cm}}\\
-\textbf{pre-process:-}\\
-\textbf{\hspace*{0.5cm}\#load-identifier}\\
+\textit{program:-}\\
+\textit{\hspace*{0.5cm}empty\_program}\\
+\textit{\hspace*{0.5cm}pre-process program}\\
+\textit{\hspace*{0.5cm}func-def program}\\
+\textit{}\\
+\textit{empty-program:- }\\
+\textit{\hspace*{0.5cm}}\\
+\textit{pre-process:-}\textbf{}\\
+\textbf{\hspace*{0.5cm}\#load-}\textit{identifier}\textbf{}\\
 \textbf{\hspace*{0.5cm}\#load-random}\\
 \textbf{}\\
-\textbf{func-def:-}\\
-\textbf{\hspace*{0.5cm}main():void \{statement-list\}}\\
-\textbf{\hspace*{0.5cm}identifier(formal-args\textsubscript{\textbf{opt}}):return-type\{statement-list\}}\\
+func-def:-\textbf{}\\
+\textbf{\hspace*{0.5cm}main():void \{}\textit{statement-list}\textbf{\}}\\
+\textbf{\hspace*{0.5cm}}\textit{identifier}\textbf{(}\textit{formal-args\textsubscript{\textbf{opt}}}\textbf{):}\textit{return-type}\textbf{\{}\textit{statement-list}\textbf{\}}\\
 \textbf{}\\
-\textbf{formal-args\textsubscript{\textbf{opt}}:-}\\
-\textbf{\hspace*{0.5cm}datatype identifier}\\
-\textbf{\hspace*{0.5cm}datatype identifier,formal-args}\\
-\textbf{}\\
-\textbf{return-type:-}\\
-\textbf{\hspace*{0.5cm}datatype}\\
+\textit{formal-args\textsubscript{\textbf{opt}}:-}\\
+\textit{\hspace*{0.5cm}datatype identifier}\\
+\textit{\hspace*{0.5cm}datatype identifier}\textbf{,}\textit{formal-args}\textbf{\textit{}}\\
+\textbf{\textit{}}\\
+\textit{return-type:-}\\
+\textit{\hspace*{0.5cm}datatype}\textbf{}\\
 \textbf{\hspace*{0.5cm}void}
 \end{document}
