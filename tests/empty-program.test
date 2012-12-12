@@ -1,0 +1,5 @@
+#!/bin/bash
+
+DESC="empty file"
+OUT=""
+ERR=""

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+DESC="returns wrong type"
+OUT=""
+ERR="RETURNS_WRONG_TYPE"
+COMPILE_ONLY=true

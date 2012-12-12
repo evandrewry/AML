@@ -1,0 +1,5 @@
+#!/bin/bash
+
+DESC="function after main"
+OUT=""
+ERR=""

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+DESC="multiplication binop"
+OUT="63"
+ERR=""

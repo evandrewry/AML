@@ -1,0 +1,5 @@
+#!/bin/bash
+
+DESC="initialize a cell"
+OUT="null"
+ERR=""

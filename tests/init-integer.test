@@ -1,0 +1,5 @@
+#!/bin/bash
+
+DESC="initialize an int"
+OUT="5"
+ERR=""

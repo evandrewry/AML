@@ -1,0 +1,7 @@
+#!/bin/bash
+
+DESC="missing return type"
+OUT=""
+ERR="MISSING_RETURN_TYPE"
+COMPILE_ONLY=true
+

@@ -2,6 +2,6 @@
 
 main():void
 {
-    Integer f = 4/0;
+    Integer f := 4/0;
     return;
 }

@@ -1,6 +1,11 @@
 #load-random
 
-main():int
+main():void
 {
     return;
+}
+
+foo():int
+{
+    return 1;
 }

@@ -1,12 +1,8 @@
 #load-random
 
-func():void
-{
-    return;
-}
-
 main():void
 {
-    func();
+    Boolean i := True;
+    print(i);
     return;
 }

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+DESC="division binop"
+OUT="4"
+ERR=""

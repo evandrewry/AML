@@ -1,0 +1,5 @@
+#!/bin/bash
+
+DESC="cell decl"
+OUT=""
+ERR=""

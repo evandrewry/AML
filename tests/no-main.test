@@ -1,0 +1,7 @@
+#!/bin/bash
+
+DESC="no main method"
+OUT=""
+ERR="NO_MAIN_METHOD"
+COMPILE_ONLY=true
+

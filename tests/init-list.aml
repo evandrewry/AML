@@ -1,12 +1,8 @@
 #load-random
 
-func():void
-{
-    return;
-}
-
 main():void
 {
-    func();
+    List i := <[1,2,3]>;
+    print(i);
     return;
 }

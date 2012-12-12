@@ -1,0 +1,7 @@
+#!/bin/bash
+
+DESC="missing preprocessor map load"
+OUT=""
+ERR="NO_PREPROCESSOR"
+COMPILE_ONLY=true
+

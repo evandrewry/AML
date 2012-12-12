@@ -1,0 +1,7 @@
+#!/bin/bash
+
+DESC="nested multiline comment"
+OUT=""
+ERR="ERROR"
+COMPILE_ONLY=true
+

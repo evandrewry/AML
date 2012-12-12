@@ -1,0 +1,5 @@
+#!/bin/bash
+
+DESC="gt binop"
+OUT="False\nFalse\nTrue"
+ERR=""

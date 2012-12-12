@@ -6,8 +6,8 @@ main():void
     return;
 }
 
-func():Boolean
+func():void
 {
-    return true;
+    return;
 }
 

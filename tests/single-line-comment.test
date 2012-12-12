@@ -1,0 +1,6 @@
+#!/bin/bash
+
+DESC="single-line comment"
+OUT=""
+ERR=""
+COMPILE_ONLY=false

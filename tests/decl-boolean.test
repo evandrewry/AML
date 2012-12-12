@@ -1,0 +1,5 @@
+#!/bin/bash
+
+DESC="boolean decl"
+OUT=""
+ERR=""

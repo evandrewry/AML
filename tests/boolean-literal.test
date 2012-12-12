@@ -1,0 +1,6 @@
+#!/bin/bash
+
+DESC="boolean literals"
+OUT="True\nFalse"
+ERR=""
+

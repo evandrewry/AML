@@ -1,0 +1,7 @@
+#!/bin/bash
+
+DESC="keyword as identifier"
+OUT=""
+ERR="KEYWORD_AS_IDENTIFIER"
+COMPILE_ONLY=true
+

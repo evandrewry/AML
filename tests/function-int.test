@@ -1,0 +1,5 @@
+#!/bin/bash
+
+DESC="int function"
+OUT="5"
+ERR=""

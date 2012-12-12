@@ -1,0 +1,5 @@
+#!/bin/bash
+
+DESC="CPos variable"
+OUT=""
+ERR=""

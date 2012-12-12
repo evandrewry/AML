@@ -1,0 +1,5 @@
+#!/bin/bash
+
+DESC="subtraction binop"
+OUT="-2"
+ERR=""

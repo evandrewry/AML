@@ -1,0 +1,7 @@
+#!/bin/bash
+
+DESC="missing semicolon"
+OUT=""
+ERR="MISSING_SEMICOLON"
+COMPILE_ONLY=true
+

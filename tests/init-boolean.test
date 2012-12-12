@@ -1,0 +1,5 @@
+#!/bin/bash
+
+DESC="initialize a boolean"
+OUT="True"
+ERR=""

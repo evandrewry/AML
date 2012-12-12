@@ -1,12 +1,8 @@
 #load-random
 
-func():void
-{
-    return;
-}
-
 main():void
 {
-    func();
+    Cell i := null;
+    print(i);
     return;
 }

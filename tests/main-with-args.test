@@ -1,0 +1,7 @@
+#!/bin/bash
+
+DESC="main with args"
+OUT=""
+ERR="MAIN_WITH_ARGS"
+COMPILE_ONLY=true
+

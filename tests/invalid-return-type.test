@@ -1,0 +1,7 @@
+#!/bin/bash
+
+DESC="invalid type"
+OUT=""
+ERR="INVALID_TYPE"
+COMPILE_ONLY=true
+

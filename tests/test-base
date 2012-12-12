@@ -1,0 +1,55 @@
+#!/bin/bash
+
+function info()  { echo -e "\033[00;34m[INFO] $1\033[00m";    }
+
+function error() { echo -e "\033[00;33m[ERROR] $1\033[00m";   }
+
+function do_test() {
+        TEST_NAME=`basename $1 .test`
+        TEST_SRC=${TEST_NAME}.aml
+        COMPILE_ONLY=false
+
+        . ${TEST_NAME}.test
+
+        if [ ! -f "$TEST_SRC" ]; then
+            error "Source file '$TEST_SRC' not found."
+            return false
+        fi
+
+        compile $TEST_NAME
+
+        if $COMPILE_ONLY; then
+            return checkoutput $TEST_NAME
+        fi
+
+        if [ ! -f "./bin/$TEST_NAME" ]; then
+            error "Binary file 'bin/$TEST_NAME' not found."
+            return false
+        fi
+
+        run $TEST_NAME
+        return checkoutput $TEST_NAME
+}
+function run_all() {
+    for test in *.test
+    do
+        do_test $test
+    done
+
+}
+function compile() {
+	echo -n "Compiling '$1'..."
+	${AML_BINARY} -i $1.aml -o ./bin/$1 >log_stdout 2>log_stderr
+}
+function run() {
+	echo -n "Running '$1'..."
+	java ./bin/$1 >log_stdout 2>log_stderr
+}
+function checkoutput() {
+    . $1.test
+    if [ $OUT == `cat log_stdout` && $ERR == `cat log_stderr` ]; then
+        info "$1 PASSED"
+    else
+        error "$1 FAILED"
+    fi
+}

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+DESC="divide by zero"
+OUT=""
+ERR="DIVIDE_BY_ZERO"

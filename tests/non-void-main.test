@@ -1,0 +1,7 @@
+#!/bin/bash
+
+DESC="non-void main"
+OUT=""
+ERR="NON_VOID_MAIN"
+COMPILE_ONLY=true
+

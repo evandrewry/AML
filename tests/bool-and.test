@@ -1,0 +1,5 @@
+#!/bin/bash
+
+DESC="AND binop"
+OUT="False\nTrue\nFalse"
+ERR=""
