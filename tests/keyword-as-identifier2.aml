@@ -1,0 +1,7 @@
+#load-random
+
+main():void
+{
+    Integer source := 7;
+    return;
+}

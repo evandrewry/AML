@@ -1,0 +1,7 @@
+#load-random
+
+main():void
+{
+    Integer f = 4/0;
+    return;
+}

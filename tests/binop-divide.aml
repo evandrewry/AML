@@ -1,0 +1,7 @@
+#load-random
+
+main():void
+{
+    print(8/2);
+    return;
+}

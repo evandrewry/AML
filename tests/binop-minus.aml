@@ -1,0 +1,7 @@
+#load-random
+
+main():void
+{
+    print(7-9);
+    return;
+}

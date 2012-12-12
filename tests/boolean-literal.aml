@@ -1,0 +1,8 @@
+#load-random
+
+main():void
+{
+    print(True);
+    print(False);
+    return;
+}

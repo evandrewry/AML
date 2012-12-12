@@ -1,0 +1,13 @@
+#load-random
+
+main():void
+{
+    func();
+    return;
+}
+
+func():Boolean
+{
+    return true;
+}
+

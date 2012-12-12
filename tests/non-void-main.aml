@@ -1,0 +1,6 @@
+#load-random
+
+main():Boolean
+{
+    return;
+}

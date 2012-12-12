@@ -1,0 +1,7 @@
+#load-random
+
+main():void
+{
+    print(T);
+    return;
+}
