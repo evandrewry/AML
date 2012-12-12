@@ -28,6 +28,7 @@ public class AMLJava extends JFrame
     static Cell current; // the current cell the bot is at
     static Cell [][] maze; // 2D representation of the maze - maze[row][col] is Cell at row row, column col, with top left being 0, 0
     static Stack<Cell> moves; // is a stack of Cells - consecutive moves that have been done, not counting "reverted" moves - used to backtrack in revert()
+    static JTextArea textArea;
     
     // build the representation of the maze from the text file
     public static void buildMaze() {
@@ -65,6 +66,15 @@ public class AMLJava extends JFrame
             }
         }
         add(mazePanel, BorderLayout.CENTER);
+        // now add the text area to display moves explicitly
+        textArea = new JTextArea(5, 1);
+        textArea.setEditable(false);
+        textArea.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+        JPanel textPanel = new JPanel();
+        textPanel.add(textArea);
+        textPanel.setBackground(Color.WHITE);
+        JScrollPane scrollPane = new JScrollPane(textPanel);
+        add(scrollPane, BorderLayout.SOUTH);
         pack();
         setVisible(true);
     }
@@ -74,33 +84,49 @@ public class AMLJava extends JFrame
     public static boolean move_U() {
         if (hasTop()) {
             move(maze[current.getRow()-1][current.getCol()]);
+            textArea.append("Bot moved UP\n");
             return true;
         }
-        else return false;
+        else {
+            textArea.append("Bot failed to move UP\n");
+            return false;
+        }
     }
     
     public static boolean move_D(){
         if (hasBottom()) {
             move(maze[current.getRow()+1][current.getCol()]);
+            textArea.append("Bot moved DOWN\n");
             return true;            
         }
-        else return false;
+        else {
+            textArea.append("Bot failed to move DOWN\n");
+            return false;
+        }
     }
     
     public static boolean move_L() {
         if (hasLeft()) {
             move(maze[current.getRow()][current.getCol()-1]);
+            textArea.append("Bot moved LEFT\n");
             return true;
         }        
-        else return false;
+        else {
+            textArea.append("Bot failed to move LEFT\n");
+            return false;
+        }
     }
     
     public static boolean move_R() {
         if (hasRight()) {
             move(maze[current.getRow()][current.getCol()+1]);
+            textArea.append("Bot moved RIGHT\n");
             return true;
         }
-        else return false;   
+        else {
+            textArea.append("Bot failed to move RIGHT\n");
+            return false;
+        }
     }
     
     // private move function eliminating duplicate code
@@ -162,7 +188,10 @@ public class AMLJava extends JFrame
     // "reverts" the previous move if possible (backtracks), returns true
     // if no moves committed returns false
     public static boolean revert() {
-        if (moves.empty()) return false; // no moves executed!
+        if (moves.empty()) {
+            textArea.append("Bot failed to REVERT (at starting position)\n");
+            return false; // no moves executed!
+        }
         else {
             try {
                 Thread.sleep(500);
@@ -172,6 +201,7 @@ public class AMLJava extends JFrame
             else current.setText("");
             current = moves.pop();
             current.setText("BOT");
+            textArea.append("Bot BACKTRACKED\n");
             return true;
         }        
     }
