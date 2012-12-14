@@ -2,7 +2,7 @@
 public class Test
 {
     public static void main(String [] args) throws Exception {
-        AMLJava.buildMaze("maze.txt");
+        AMLJava.buildMaze("random");
         AMLJava.move_U();
         AMLJava.move_L();
         AMLJava.move_D();

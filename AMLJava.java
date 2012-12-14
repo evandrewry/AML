@@ -84,7 +84,8 @@ public class AMLJava extends JFrame
         int cRow = c.getRow();
         int cCol = c.getCol();
         if (steps == 0) { // make this cell the starting one
-            maze[cRow][cCol] = new Cell(2, cRow, cCol);
+            current = maze[cRow][cCol] = new Cell(2, cRow, cCol);
+			
             return true;
         }
         LinkedList<String> dirs = new LinkedList<String>();
