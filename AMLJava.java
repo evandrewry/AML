@@ -245,6 +245,41 @@ public class AMLJava extends JFrame
         return false;
     }
     
+    public static Cell right() {
+        if (hasRight()) {
+            Cell c = maze[current.getRow()][current.getCol()+1];
+            if (c.getVisited()) return c;
+            else return null;
+        }
+        else return null;
+    }
+    
+    public static Cell top() {
+        if (hasTop()) {
+            Cell c = maze[current.getRow()-1][current.getCol()];
+            if (c.getVisited()) return c;
+            else return null;
+        }
+        else return null;
+    }
+    
+    public static Cell bottom() {
+        if (hasRight()) {
+            Cell c = maze[current.getRow()+1][current.getCol()];
+            if (c.getVisited()) return c;
+            else return null;
+        }
+        else return null;
+    }
+    
+    public static Cell left() {
+        if (hasRight()) {
+            Cell c = maze[current.getRow()][current.getCol()-1];
+            if (c.getVisited()) return c;
+            else return null;
+        }
+        else return null;
+    }
     // returns whether or not the cell at row, col has been visited
     public static boolean visit(int row, int col) {
         return maze[row][col].getVisited();
