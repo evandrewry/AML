@@ -29,8 +29,8 @@ rule token =
 | "~=" { NEQ }
 | "=" { EQ }
 | ":=" { ASSIGN }
-| "True" { TRUE }
-| "False" { FALSE }
+| "true" { TRUE }
+| "false" { FALSE }
 | "null" { NULL }
 | "NOT" { NOT }
 | "AND" { AND }
@@ -42,13 +42,13 @@ rule token =
 | "function" { FUNC }
 | "main" { ENTRY }
 | "void" { VOID }
+| "print" { PRINT }
 | "integer" { INTEGER }
 | "bool" { BOOLEAN }
 | "list" { LIST }
 | "cell" { CELL }
 | "if" { IF }
 | "else" { ELSE }
-| "print" { PRINT }
 | "display" { DISPLAY }
 | "move_U" { MOVEUP }
 | "move_D" { MOVEDOWN }
@@ -58,7 +58,7 @@ rule token =
 | "get_Loc" { LOC }
 | "isTarget" { ISTARGET }
 | "visited" { VISIT }
-| "source" { SOURCE }
+| "isSource" { SOURCE }
 | "revert" { REVERT }
 | "left" { LEFT }
 | "right" { RIGHT }
@@ -78,6 +78,7 @@ rule token =
 | letter(letter|digit)* as amlex { ID(amlex) }
 | "/*" { multicmnt lexbuf}
 | "//" { singlecmnt lexbuf}
+| eof { EOF }
 
 and multicmnt = 
 	parse "*/" { token lexbuf}

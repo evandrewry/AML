@@ -20,6 +20,7 @@
 %token AND OR NOT
 %token <string> ID
 %token <int> NUM_LITERAL
+%token EOF
 
 %nonassoc ELSE
 %left GTR LSR GTREQL LSREQL NEQ EQ 
@@ -43,21 +44,23 @@ program:
 
 pre_process:
 	HASH LOAD LSR ID GTR  { Load($4) }
-| HASH LOAD MINUS RANDOM { Load("Random") }
+| HASH LOAD MINUS RANDOM { Load("random") }
 
 func_decl:
-	ENTRY LPAREN RPAREN RTYPE VOID LBRACE stmt_list RBRACE 
+	ENTRY LPAREN RPAREN RTYPE VOID LBRACE vdecl_list stmt_list RBRACE 
 		{ Main({
-					mainId = "Main";
-					body = List.rev $7;
+					mainId = "main";
+					mainVars = List.rev $7;
+					body = $8;
 					})
 		}  
-|	FUNC ID LPAREN formal_args RPAREN RTYPE return_type LBRACE stmt_list RBRACE		
+|	FUNC ID LPAREN formal_args RPAREN RTYPE return_type LBRACE vdecl_list stmt_list RBRACE		
 		{ Func({
 					funcId = $2;
 					formalArgs = List.rev $4;
-					dataType = $7;
-					statements = List.rev $9;
+					reType = $7;
+					localVars = List.rev $9;
+					statements = $10;
 				})
 		}
 	
@@ -79,16 +82,39 @@ formal_args:
 	|data_type ID   { [FormalVar($1, $2)] }
 	|formal_args COMMA data_type ID { FormalVar($3, $4) :: $1 }  
 	
+vdecl_list: 
+/* No variable declaration */ { [] }
+|  vdecl_list vdecl { $2 :: $1 }
+
+vdecl:
+ data_type ID ASSIGN expr STMTEND { Define($1,$2,$4) }
+
 stmt_list:
   stmt { [$1] }
-| stmt_list stmt { $2 :: $1 }
+| stmt stmt_list { $1 :: $2 }
 
 stmt:
   expr STMTEND { Expr($1) }
 | RETURN expr STMTEND { Return($2) }
+| impl_fns STMTEND{ $1 }
+| move_stmt STMTEND { Move($1) }
+| ID ASSOC LISTADD LPAREN expr RPAREN  STMTEND { ListAdd($1,$5) }
+| MOVETO ID STMTEND{ MoveTo($2) }
 | LBRACE stmt_list RBRACE { StmtBlk($2) }
 | IF LPAREN expr RPAREN stmt STMTEND { If($3, $5, StmtBlk([])) }
 | IF LPAREN expr RPAREN stmt ELSE stmt { If($3, $5, $7) }
+
+impl_fns:
+| REVERT LPAREN RPAREN { Revert }
+| EXIT LPAREN RPAREN{ Exit }
+| DISPLAY LPAREN RPAREN{ Display }
+| PRINT LPAREN expr RPAREN{ Print($3) }
+
+move_stmt:
+| MOVEUP LPAREN RPAREN { 1 }
+| MOVEDOWN LPAREN RPAREN { 2 }
+| MOVERIGHT LPAREN RPAREN { 3 }
+| MOVELEFT LPAREN RPAREN { 4 }
 
 expr: 
   vars { Vars($1) }
@@ -107,18 +133,15 @@ expr:
 | expr LSR expr { BinOpr(Lsr,$1,$3) }
 | expr GTREQL expr { BinOpr(Geq,$1,$3) }
 | expr LSREQL expr { BinOpr(Leq,$1,$3) }
-| NOT expr { BoolOpr(Not,$2,$2) }
-| expr AND expr { BoolOpr(And,$1,$3) }
-| expr OR expr { BoolOpr(Or,$1,$3) }
+| NOT expr { BinOpr(Not,$2,$2) }
+| expr AND expr { BinOpr(And,$1,$3) }
+| expr OR expr { BinOpr(Or,$1,$3) }
 | ID ASSIGN expr  { Assign($1,$3) }
-| data_type ID { Define($1,$2) }
-| data_type ID ASSIGN expr { AssignDef($1,$2,$4) }
 | ID LPAREN actual_args RPAREN { Funcall($1,$3) }
 | ID ASSOC LISTREMOVE LPAREN RPAREN  { Assoc(Remove,$1) }
 | ID ASSOC LISTNEXT LPAREN RPAREN { Assoc(Next,$1) }
 | ID ASSOC LISTHEAD LPAREN RPAREN { Assoc(Head,$1) }
 | ID ASSOC LISTEMPTY LPAREN RPAREN { Assoc(Empty,$1) }
-| ID ASSOC LISTADD LPAREN expr RPAREN  { ListAdd($1,$5) }
 | ID ASSOC UP LPAREN RPAREN { Assoc(Up,$1) }
 | ID ASSOC DOWN LPAREN RPAREN { Assoc(Down,$1) }
 | ID ASSOC LEFT LPAREN RPAREN { Assoc(Left,$1) }
@@ -127,25 +150,16 @@ expr:
 | ID ASSOC HASRIGHT LPAREN RPAREN { Assoc(Hright,$1) }
 | ID ASSOC HASTOP LPAREN RPAREN { Assoc(Htop,$1) }
 | ID ASSOC HASBTM LPAREN RPAREN { Assoc(Hbtm,$1) }
-| ID ASSOC SOURCE LPAREN RPAREN { Assoc(Src,$1) }
 | LOC LPAREN ID RPAREN  { Loc($3) }
+| SOURCE LPAREN ID RPAREN { Src($3) }
 | ISTARGET LPAREN ID RPAREN { Target($3) }
 | VISIT LPAREN ID RPAREN { Visit($3) }
-| REVERT LPAREN RPAREN { Revert }
-| EXIT LPAREN RPAREN{ Exit }
-| DISPLAY LPAREN RPAREN{ Display }
-| PRINT LPAREN ID RPAREN{ Print($3) }
 | LPAREN CUR_POS RPAREN { Pointer } 
-| MOVEUP { Move(1) }
-| MOVEDOWN { Move(2) }
-| MOVERIGHT { Move(3) }
-| MOVELEFT { Move(4) }
-| MOVETO NUM_LITERAL { Move($2) }
 
 prim_vars:
   NUM_LITERAL { Lit_Int($1) }
-| TRUE { Lit_Bool(True) }
-| FALSE { Lit_Bool(False) }
+| TRUE { Lit_Bool(true) }
+| FALSE { Lit_Bool(false) }
 
 vars:
   prim_vars { $1 }
@@ -153,13 +167,13 @@ vars:
 
 complete_list:
   LSQUARE RSQUARE{ [] }
-| LSQUARE var_list RSQUARE { List.rev $2 }
-| LSQUARE complete_list RSQUARE { List.rev $2 }
-| LSQUARE complete_list COMMA LSQUARE var_list RSQUARE RSQUARE { List.append $2 $5 }
+| LSQUARE var_list RSQUARE { $2 }
+| LSQUARE complete_list RSQUARE { [Lit_List($2)] }
+| LSQUARE complete_list COMMA LSQUARE var_list RSQUARE RSQUARE { Lit_List($2) :: [Lit_List($5)] }
 
 var_list:
   prim_vars	{ [$1] }
-| var_list COMMA prim_vars { $3::$1 }
+| prim_vars COMMA var_list { $1::$3 }
 
 actual_args:
 /* no arguments*/ { [] }
