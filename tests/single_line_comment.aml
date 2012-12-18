@@ -3,4 +3,5 @@
 main():void
 //this is a single line comment
 {
+    print(true);
 }

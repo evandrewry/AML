@@ -2,6 +2,6 @@
 
 main():void
 {
-    list i := <[1,2,3]>;
+    list<integer> i := <[1,2,3]>;
     print(i);
 }

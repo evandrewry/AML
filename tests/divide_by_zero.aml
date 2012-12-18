@@ -2,5 +2,5 @@
 
 main():void
 {
-    Integer f := 4/0;
+    print(4/0);
 }

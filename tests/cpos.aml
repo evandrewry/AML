@@ -1,6 +1,8 @@
-#load-random
+#load<maze>
 
 main():void
 {
-    print(CPos);
+    cell i := (CPos);
+    print(get_Loc(i));
 }
+

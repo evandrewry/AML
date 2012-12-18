@@ -1,11 +1,11 @@
 #load-random
 
-func():Integer
-{
-    return 5;
-}
-
 main():void
 {
     print(func());
+}
+
+function func():integer
+{
+    return 5;
 }

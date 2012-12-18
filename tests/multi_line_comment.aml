@@ -6,4 +6,5 @@ main():void
  * a multiline
  * comment
  */
+    print(true);
 }

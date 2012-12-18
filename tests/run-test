@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if [ ! -f "$1" ] || [ $# -lt 2 ]; then
+    echo "Usage: run-test <AML-BINARY> <TEST-NAME>"
+    exit 1
+fi
+
+. test-base
+AML_BINARY=$1
+
+shift
+while [ $1 ]
+do
+    do_test $1.test
+    shift
+done
+exit $?

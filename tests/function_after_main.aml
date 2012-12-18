@@ -5,8 +5,8 @@ main():void
     func();
 }
 
-func():void
+function func():void
 {
-    return;
+    print(true);
 }
 

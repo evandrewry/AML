@@ -1,5 +1,5 @@
 #!/bin/bash
 
 DESC="initialize a list"
-OUT="<[1,2,3]>"
+OUT="[1, 2, 3]"
 ERR=""

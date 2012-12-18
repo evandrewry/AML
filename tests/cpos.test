@@ -1,5 +1,5 @@
 #!/bin/bash
 
 DESC="CPos variable"
-OUT=""
+OUT="8"
 ERR=""

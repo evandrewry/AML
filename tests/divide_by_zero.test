@@ -2,4 +2,5 @@
 
 DESC="divide by zero"
 OUT=""
-ERR="DIVIDE_BY_ZERO"
+ERR='Exception in thread "main" java.lang.ArithmeticException: / by zero
+	at divide_by_zero.main(divide_by_zero.java:6)'

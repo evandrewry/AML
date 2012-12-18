@@ -2,5 +2,5 @@
 
 DESC="function before main"
 OUT=""
-ERR=""
-
+ERR='Fatal error: exception Failure("'"'main'"' must be after load")'
+COMPILE_ONLY=true

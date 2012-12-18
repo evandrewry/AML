@@ -1,5 +1,5 @@
 #!/bin/bash
 
 DESC="function after main"
-OUT=""
+OUT="true"
 ERR=""

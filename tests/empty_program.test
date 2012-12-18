@@ -2,4 +2,5 @@
 
 DESC="empty file"
 OUT=""
-ERR=""
+ERR='Fatal error: exception Failure("hd")'
+COMPILE_ONLY=true

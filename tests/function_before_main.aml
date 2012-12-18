@@ -1,8 +1,8 @@
 #load-random
 
-func():void
+function func():void
 {
-    return;
+    print(true);
 }
 
 main():void

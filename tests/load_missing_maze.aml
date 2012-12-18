@@ -1,7 +1,7 @@
-#load-random
+#load<bogus>
 
 main():void
 {
     cell i := (CPos);
-    get_Loc(i);
+    print(get_Loc(i));
 }

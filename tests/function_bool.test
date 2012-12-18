@@ -1,5 +1,5 @@
 #!/bin/bash
 
 DESC="boolean function"
-OUT="True"
+OUT="true"
 ERR=""
