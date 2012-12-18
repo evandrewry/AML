@@ -105,14 +105,11 @@ function clean() {
 }
 
 function copydependencies() {
-    if [ ! -f AMLJava.class ]; then
-        cp ../../AMLJava.class .
-    fi
-    if [ ! -f Cell.class ]; then
-        cp ../../Cell.class .
-    fi
-    if [ ! -f List.class ]; then
-        cp ../../List.class .
+    if [ ! -f AMLJava.class ] || [ ! -f Cell.class ] || [ ! -f List.class ]; then
+        cp ../../AMLJava.java .
+        cp ../../Cell.java .
+        cp ../../List.java .
+        javac AMLJava.java
     fi
     if [ ! -f maze ]; then
         cp ../maze.txt ./maze
