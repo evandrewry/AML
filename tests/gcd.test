@@ -1,0 +1,5 @@
+#!/bin/bash
+
+DESC="gcd algorithm"
+OUT="7"
+ERR=""
