@@ -30,21 +30,24 @@ function do_test() {
         run $TEST_NAME
         return checkoutput $TEST_NAME
 }
+
 function run_all() {
     for test in *.test
     do
         do_test $test
     done
-
 }
+
 function compile() {
 	echo -n "Compiling '$1'..."
 	${AML_BINARY} -i $1.aml -o ./bin/$1 >log_stdout 2>log_stderr
 }
+
 function run() {
 	echo -n "Running '$1'..."
 	java ./bin/$1 >log_stdout 2>log_stderr
 }
+
 function checkoutput() {
     . $1.test
     if [ $OUT == `cat log_stdout` && $ERR == `cat log_stderr` ]; then
