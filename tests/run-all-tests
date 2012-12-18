@@ -1,0 +1,10 @@
+#!/bin/bash
+
+AML_BINARY=$1
+if [ ! -f "$1" ]; then
+    echo "Usage: run-all-tests <AML BINARY>"
+    exit 1
+fi
+. test-base
+run_all
+exit $?

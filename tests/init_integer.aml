@@ -1,0 +1,7 @@
+#load-random
+
+main():void
+{
+    Integer i := 5;
+    print(i);
+}

@@ -1,9 +1,0 @@
-#load-random
-
-main():void
-{
-    print(True OR False);
-    print(True OR True);
-    print(False OR False);
-    return;
-}

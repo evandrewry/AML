@@ -1,0 +1,7 @@
+#load-random
+
+main():void
+{
+    Cell i := null;
+    print(i);
+}

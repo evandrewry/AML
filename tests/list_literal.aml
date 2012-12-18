@@ -2,5 +2,5 @@
 
 main():void
 {
-    print(CPos);
+    print(<[1,2,3]>);
 }

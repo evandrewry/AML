@@ -1,6 +1,0 @@
-#load-random
-
-foo():void
-{
-    return;
-}

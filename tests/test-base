@@ -8,27 +8,30 @@ function do_test() {
         TEST_NAME=`basename $1 .test`
         TEST_SRC=${TEST_NAME}.aml
         COMPILE_ONLY=false
+        GUITEST=false
 
         . ${TEST_NAME}.test
 
         if [ ! -f "$TEST_SRC" ]; then
             error "Source file '$TEST_SRC' not found."
-            return false
+            return 1
         fi
 
         compile $TEST_NAME
 
         if $COMPILE_ONLY; then
-            return checkoutput $TEST_NAME
+            checkoutput $TEST_NAME
+            return $?
         fi
 
-        if [ ! -f "./bin/$TEST_NAME" ]; then
-            error "Binary file 'bin/$TEST_NAME' not found."
-            return false
+        if [ ! -f "./bin/$TEST_NAME.class" ]; then
+            error "Binary file 'bin/$TEST_NAME.class' not found."
+            return 1
         fi
 
         run $TEST_NAME
-        return checkoutput $TEST_NAME
+        checkoutput $TEST_NAME
+        return $?
 }
 
 function run_all() {
@@ -39,20 +42,77 @@ function run_all() {
 }
 
 function compile() {
-	echo -n "Compiling '$1'..."
-	${AML_BINARY} -i $1.aml -o ./bin/$1 >log_stdout 2>log_stderr
+	echo "Compiling '$1'..."
+    if [ ! -d "bin" ]; then
+        mkdir bin
+    fi
+    cd bin
+    copydependencies
+	../$AML_BINARY -c ../$1.aml >log_stdout 2>log_stderr
+    if [ -f "$1.java" ]; then
+        javac -classpath ../../ ./$1.java
+    fi
+    cd ..
 }
 
 function run() {
-	echo -n "Running '$1'..."
-	java ./bin/$1 >log_stdout 2>log_stderr
+	echo "Running '$1'..."
+    cd bin
+    if $GUITEST; then
+        java $1 >log_stdout 2>log_stderr
+    else
+        java $1 >log_stdout 2>log_stderr &
+        sleep 2
+        kill -9 $!
+    fi
+    cd ..
 }
 
 function checkoutput() {
     . $1.test
-    if [ $OUT == `cat log_stdout` && $ERR == `cat log_stderr` ]; then
+
+    if [ -f bin/log_stdout ]; then
+        ACTUAL_OUT=`cat bin/log_stdout`
+    else
+        ACTUAL_OUT=""
+    fi
+
+    if [ -f bin/log_stderr ]; then
+        ACTUAL_ERR=`cat bin/log_stderr`
+    else
+        ACTUAL_ERR=""
+    fi
+
+    rm log_stdout &> /dev/null
+    rm log_stderr &> /dev/null
+
+    echo expected err: $ERR
+    echo actual err: $ACTUAL_ERR
+
+    echo expected out: $OUT
+    echo actual out: $ACTUAL_OUT
+
+    if [ "$OUT" == "$EXPECTED_OUT" -a "$ERR" == "$EXPECTED_ERR" ]; then
         info "$1 PASSED"
+        return 0
     else
         error "$1 FAILED"
+        return 1
+    fi
+}
+
+function clean() {
+    rm -rf bin
+}
+
+function copydependencies() {
+    if [ ! -f AMLJava.class ]; then
+        cp ../../AMLJava.class .
+    fi
+    if [ ! -f Cell.class ]; then
+        cp ../../Cell.class .
+    fi
+    if [ ! -f List.class ]; then
+        cp ../../List.class .
     fi
 }

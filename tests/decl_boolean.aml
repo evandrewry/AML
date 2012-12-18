@@ -2,5 +2,5 @@
 
 main():void
 {
-    print(CPos);
+    Boolean i;
 }

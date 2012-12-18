@@ -1,7 +1,0 @@
-#load-random
-
-main():void
-{
-    Integer print := 7;
-    return;
-}

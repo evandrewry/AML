@@ -1,0 +1,9 @@
+#load-random
+
+main():void
+{
+/* this is
+ * a multiline
+ * comment
+ */
+}

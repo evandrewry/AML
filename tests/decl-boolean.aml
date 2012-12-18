@@ -1,7 +1,0 @@
-#load-random
-
-main():void
-{
-    Boolean i;
-    return;
-}

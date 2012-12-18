@@ -1,8 +1,0 @@
-#load-random
-
-main():void
-{
-    print(NOT False);
-    print(NOT True);
-    return;
-}

@@ -1,0 +1,11 @@
+#load-random
+
+func():void
+{
+    return;
+}
+
+main():void
+{
+    func();
+}

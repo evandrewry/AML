@@ -2,5 +2,9 @@
 
 main():void
 {
-    print(CPos);
+}
+
+foo():int
+{
+    return 1;
 }

@@ -2,5 +2,5 @@
 
 main():void
 {
-    print(CPos);
+    print(7+9/3^0);
 }

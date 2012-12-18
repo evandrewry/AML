@@ -1,0 +1,15 @@
+#load-random
+
+main():void
+{
+/* this is a 
+ *
+/* this is
+ * a multiline
+ * comment
+ */
+ * multiline
+ * comments do 
+ * not nest
+ */
+}
