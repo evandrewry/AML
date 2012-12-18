@@ -2,7 +2,6 @@ open Ast
 
 type env = {
 	mutable functions : funcs list ;
-	variables : vdecl list;
 }
 
 let equal_function_names id = function
@@ -301,12 +300,37 @@ let rec get_expr_type e func env=
 															end
 		| Paran(e) -> get_expr_type e	func env
 		| Assign(_,_) -> Void
-		| Assoc(_,_) -> Void
-		| Visit(_) -> Data(Bool)
-		| Target(_) -> Data(Bool)
-		| Src(_) -> Data(Bool)
+		| Assoc(a,b) -> if exists_id b func  then
+										begin
+											match a with
+											| Left -> Data(Cell)
+											| Right ->  Data(Cell)
+											| Up -> Data(Cell)
+											| Down -> Data(Cell)
+											| Hleft -> Data(Bool) 
+											| Hright -> Data(Bool) 
+											| Htop -> Data(Bool)
+											| Hbtm -> Data(Bool)
+											| Empty -> Data(Bool)
+											| Remove -> Data(Cell)
+											| _ -> Void
+										end
+										else
+											raise(Failure(b ^ " not defined ")) 
+		| Visit(s) -> Data(Bool)
+		| Target(b) -> if exists_id b func  then
+										Data(Bool)
+									else
+										raise(Failure("Invalid expression "^ b))
+		| Src(b) -> if exists_id b func  then
+									Data(Bool)
+								else
+										raise(Failure("Invalid expression "^ b))	
 		| Pointer -> Data(Cell)
-		| Loc(_) -> Data(Cell)
+		| Loc(b) -> if exists_id b func  then
+									Data(Cell)
+								else
+										raise(Failure("Invalid expression "^ b))	
 		| Null -> Void
 
 let rec get_expr_type_main e func env=
@@ -349,12 +373,37 @@ let rec get_expr_type_main e func env=
 															end
 		| Paran(e) -> get_expr_type_main e func env
 		| Assign(_,_) -> Void
-		| Assoc(_,_) -> Void
-		| Visit(_) -> Data(Bool)
-		| Target(_) -> Data(Bool)
-		| Src(_) -> Data(Bool)
+		| Assoc(a,b) -> if exists_id_main b func  then
+										begin
+											match a with
+											| Left -> Data(Cell)
+											| Right ->  Data(Cell)
+											| Up -> Data(Cell)
+											| Down -> Data(Cell)
+											| Hleft -> Data(Bool) 
+											| Hright -> Data(Bool) 
+											| Htop -> Data(Bool)
+											| Hbtm -> Data(Bool)
+											| Empty -> Data(Bool)
+											| Remove -> Data(Cell)
+											| _ -> Void
+										end
+										else
+											raise(Failure(b ^ " not defined ")) 
+		| Visit(s) -> Data(Bool)
+		| Target(b) -> if exists_id_main b func  then
+										Data(Bool)
+									else
+										raise(Failure("Invalid expression "^ b))
+		| Src(b) -> if exists_id_main b func  then
+									Data(Bool)
+								else
+										raise(Failure("Invalid expression "^ b))	
 		| Pointer -> Data(Cell)
-		| Loc(_) -> Data(Cell)
+		| Loc(b) -> if exists_id_main b func  then
+									Data(Cell)
+								else
+										raise(Failure("Invalid expression "^ b))	
 		| Null -> Void
 		
 (*Checks if the given expression is a valid  assignment / call expression*)
@@ -489,7 +538,7 @@ let valid_vdecl func env =
 				let e = "Invalid variable declaration for '" ^ nm ^ "' in " ^ func.mainId ^ "\n" in
 					let be = e ^ "The only allowed values for initializing boolean variables are 'true' and 'false.' \\n" in
 						match dt with
-						  Cell -> if string_of_expr value = "(CPos)" then true else raise (Failure e)
+						  Cell -> if string_of_expr value = "AMLJava.current" then true else raise (Failure e)
 						| List(g)  -> begin 
 														match value with 
 														| Vars(f) -> if is_list f then true else raise (Failure e)
@@ -586,6 +635,23 @@ let has_return_stmt func =
 			  Return(e) -> raise(Failure("Return statement is not permitted in main method"))
 			| _ -> false
 
+let rec count_rets = function
+	| [] -> 0
+	| hd::tl -> begin
+								match hd with
+								| Return(_) -> 1 + count_rets tl
+								| _ -> count_rets tl
+							end
+		
+let has_multiple_ret func = 
+	let count = count_rets func.statements in 
+	if count > 1 then
+		raise(Failure("Multiple return statements"))
+	else 
+		if count = 1 && if_else_has_return_stmt func.statements then
+			raise(Failure("Multiple return statements"))
+		else
+			false
 
 let has_return func =
 	let stmt_list = func.statements in
@@ -615,7 +681,8 @@ let valid_return_stmt env = function
 						else true
 | Func(func) ->
 		let ifelse_has_return = if_else_has_return_stmt func.statements in (*whether if/else block both have a return value*)
-			let has_return = has_return func in	 (*if a function's last stmt is a return stmt*)
+			let has_return = has_return func in
+				let _ = has_multiple_ret func in 	 (*if a function's last stmt is a return stmt*)
 					if func.reType = Void then
 						if (has_return && not ifelse_has_return) or (not has_return && ifelse_has_return) then
 							raise(Failure("Invalid return expression in function " ^ func.funcId ^ ": function is void"))
@@ -645,6 +712,7 @@ let rec valid_expr (func : Ast.func) expr env =
 					| Bool,Data(Bool) -> true
 					| List(x),Data(List(y)) -> if x = y then true else raise(Failure ("DataTypes do not match up in an assignment expression to variable " ^ id))
 					| List(x),Void -> (e1 = Null)
+					| Cell, Data(Cell) -> true
 					| _,_ -> raise(Failure ("DataTypes do not match up in an assignment expression to variable " ^ id))
 				else raise( Failure ("Undeclared identifier " ^ id ^ " is used" ))
 	| Funcall(fname, exprlist) -> if exists_function_name fname env then
@@ -656,10 +724,22 @@ let rec valid_expr (func : Ast.func) expr env =
 																else
 																	raise(Failure ("Undefined function "^ fname ^" is used")) 
 	| Paran(e) -> valid_expr func e env
-	| Assoc(_,b) -> valid_expr func (Id(b)) env
-	| Loc(x) ->  (valid_expr func (Id(x)) env) &&  (get_type func x = Cell)
-	| Target(x) -> (valid_expr func (Id(x)) env) && (get_type func x = Cell)
-	| Visit(x) -> (valid_expr func (Id(x)) env) && (get_type func x = Cell)
+	| Assoc(_,s) -> if exists_id s func then true else raise (Failure ("Undeclared identifier " ^ s ^ " is used"))
+	| Loc(s) ->  if exists_id s func then
+								if (get_type func s = Cell) then
+									true
+								else
+									raise(Failure("Not a cell type")) 
+							else
+								raise (Failure ("Undeclared identifier " ^ s ^ " is used")) 
+	| Target(s) -> if exists_id s func then
+									if (get_type func s = Cell) then
+										true
+									else
+										raise(Failure("Not a cell type")) 
+								else
+									raise (Failure ("Undeclared identifier " ^ s ^ " is used"))
+	| Visit(x) -> (valid_expr func x env) && (get_expr_type x func env  = Data(Cell))
 	| _ -> false (*should not happen - added this to turn off compiler warnings about incomplete matching for Noexpr*)
 
 
@@ -677,6 +757,7 @@ let rec valid_expr_main (func : Ast.main) expr env =
 					| Bool,Data(Bool) -> true
 					| List(x),Data(List(y)) -> if x = y then true else raise(Failure ("DataTypes do not match up in an assignment expression to variable " ^ id))
 					| List(x),Void -> (e1 = Null)
+					| Cell, Data(Cell) -> true
 					| _,_ -> raise(Failure ("DataTypes do not match up in an assignment expression to variable " ^ id))
 				else raise( Failure ("Undeclared identifier " ^ id ^ " is used" ))
 	| Funcall(fname, exprlist) -> if exists_function_name fname env then
@@ -691,7 +772,7 @@ let rec valid_expr_main (func : Ast.main) expr env =
 	| Assoc(_,b) -> valid_expr_main func (Id(b)) env
 	| Loc(x) ->  (valid_expr_main func (Id(x)) env) &&  (get_type_main func x = Cell)
 	| Target(x) -> (valid_expr_main func (Id(x)) env) && (get_type_main func x = Cell)
-	| Visit(x) -> (valid_expr_main func (Id(x)) env) && (get_type_main func x = Cell)
+	| Visit(x) -> (valid_expr_main func x env) && (get_expr_type_main x func env  = Data(Cell))
 	| _ -> false (*should not happen - added this to turn off compiler warnings about incomplete matching for Noexpr*)
 
 
@@ -850,7 +931,7 @@ let checkLoad list = begin
 										end
 
 let check_program flist =
-	let (environment : env) = { functions = flist ; variables = [] } in
+	let (environment : env) = { functions = flist} in
 		let _loadchecker = numLoad flist = 1 in 
 			let _loadmain = checkLoad flist in 
 				let _dovalidation = List.map ( fun(f) -> valid_func environment f) flist in (*Do the semantic analysis*)

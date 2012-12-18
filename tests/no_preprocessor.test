@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DESC="missing preprocessor map load"
-OUT=""
-ERR="NO_PREPROCESSOR"
+OUT="syntax error"
+ERR="Fatal error: exception Parsing.Parse_error"
 COMPILE_ONLY=true
 

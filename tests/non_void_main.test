@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DESC="non-void main"
-OUT=""
-ERR="NON_VOID_MAIN"
+OUT="syntax error"
+ERR="Fatal error: exception Parsing.Parse_error"
 COMPILE_ONLY=true
 

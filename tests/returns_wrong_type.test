@@ -2,5 +2,5 @@
 
 DESC="returns wrong type"
 OUT=""
-ERR="RETURNS_WRONG_TYPE"
+ERR='Fatal error: exception Failure("Return statement is not permitted in main method")'
 COMPILE_ONLY=true

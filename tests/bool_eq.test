@@ -1,5 +1,5 @@
 #!/bin/bash
 
 DESC="== binop"
-OUT="False\nTrue"
+OUT=$'false\ntrue'
 ERR=""

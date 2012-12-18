@@ -2,6 +2,6 @@
 
 main():void
 {
-    Boolean i := True;
+    bool i := True;
     print(i);
 }

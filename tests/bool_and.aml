@@ -2,7 +2,7 @@
 
 main():void
 {
-    print(True AND False);
-    print(True AND True);
-    print(False AND False);
+    print(true AND false);
+    print(true AND true);
+    print(false AND false);
 }

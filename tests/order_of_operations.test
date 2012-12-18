@@ -1,5 +1,5 @@
 #!/bin/bash
 
 DESC="order of operations"
-OUT="16"
+OUT="16.0"
 ERR=""

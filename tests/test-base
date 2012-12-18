@@ -63,7 +63,7 @@ function run() {
     else
         java $1 >log_stdout 2>log_stderr &
         sleep 2
-        kill -9 $!
+        kill $!
     fi
     cd ..
 }
@@ -86,16 +86,15 @@ function checkoutput() {
     rm log_stdout &> /dev/null
     rm log_stderr &> /dev/null
 
-    echo expected err: $ERR
-    echo actual err: $ACTUAL_ERR
 
-    echo expected out: $OUT
-    echo actual out: $ACTUAL_OUT
-
-    if [ "$OUT" == "$EXPECTED_OUT" -a "$ERR" == "$EXPECTED_ERR" ]; then
+    if [ "$OUT" = "$ACTUAL_OUT" ] && [ "$ERR" = "$ACTUAL_ERR" ]; then
         info "$1 PASSED"
         return 0
     else
+        echo expected err: "$ERR"
+        echo actual err: "$ACTUAL_ERR"
+        echo expected out: "$OUT"
+        echo actual out: "$ACTUAL_OUT"
         error "$1 FAILED"
         return 1
     fi

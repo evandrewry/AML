@@ -2,6 +2,6 @@
 
 main():void
 {
-    print(NOT False);
-    print(NOT True);
+    print(NOT false);
+    print(NOT true);
 }

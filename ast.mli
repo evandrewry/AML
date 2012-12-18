@@ -30,7 +30,7 @@ type expr =
 | Loc of string
 | Target of string
 | Src of string
-| Visit of string
+| Visit of expr
 | Pointer
 | Null
 

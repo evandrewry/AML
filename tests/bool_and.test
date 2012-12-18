@@ -1,5 +1,5 @@
 #!/bin/bash
 
 DESC="AND binop"
-OUT="False\nTrue\nFalse"
+OUT=$'false\ntrue\nfalse'
 ERR=""

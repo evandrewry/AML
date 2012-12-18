@@ -16,7 +16,7 @@
 %token MOVEUP MOVEDOWN MOVELEFT MOVERIGHT MOVETO CUR_POS
 %token ISTARGET VISIT SOURCE REVERT LOC
 %token LEFT RIGHT UP DOWN HASLEFT HASRIGHT HASTOP HASBTM 
-%token LISTADD LISTREMOVE LISTNEXT LISTHEAD LISTEMPTY
+%token LISTADD LISTREMOVE LISTCLEAR LISTHEAD LISTEMPTY
 %token AND OR NOT
 %token <string> ID
 %token <int> NUM_LITERAL
@@ -99,7 +99,7 @@ stmt:
 | impl_fns STMTEND{ $1 }
 | move_stmt STMTEND { Move($1) }
 | ID ASSOC LISTADD LPAREN expr RPAREN  STMTEND { ListAdd($1,$5) }
-| MOVETO ID STMTEND{ MoveTo($2) }
+| MOVETO LPAREN ID RPAREN  STMTEND{ MoveTo($3) }
 | LBRACE stmt_list RBRACE { StmtBlk($2) }
 | IF LPAREN expr RPAREN stmt STMTEND { If($3, $5, StmtBlk([])) }
 | IF LPAREN expr RPAREN stmt ELSE stmt { If($3, $5, $7) }
@@ -137,9 +137,9 @@ expr:
 | expr AND expr { BinOpr(And,$1,$3) }
 | expr OR expr { BinOpr(Or,$1,$3) }
 | ID ASSIGN expr  { Assign($1,$3) }
-| ID LPAREN actual_args RPAREN { Funcall($1,$3) }
+| ID LPAREN actual_args RPAREN { Funcall($1,List.rev $3) }
 | ID ASSOC LISTREMOVE LPAREN RPAREN  { Assoc(Remove,$1) }
-| ID ASSOC LISTNEXT LPAREN RPAREN { Assoc(Next,$1) }
+| ID ASSOC LISTCLEAR LPAREN RPAREN { Assoc(Next,$1) }
 | ID ASSOC LISTHEAD LPAREN RPAREN { Assoc(Head,$1) }
 | ID ASSOC LISTEMPTY LPAREN RPAREN { Assoc(Empty,$1) }
 | ID ASSOC UP LPAREN RPAREN { Assoc(Up,$1) }
@@ -153,7 +153,7 @@ expr:
 | LOC LPAREN ID RPAREN  { Loc($3) }
 | SOURCE LPAREN ID RPAREN { Src($3) }
 | ISTARGET LPAREN ID RPAREN { Target($3) }
-| VISIT LPAREN ID RPAREN { Visit($3) }
+| VISIT LPAREN expr RPAREN { Visit($3) }
 | LPAREN CUR_POS RPAREN { Pointer } 
 
 prim_vars:

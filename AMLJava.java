@@ -207,7 +207,7 @@ public class AMLJava extends JFrame
     
     // private move function eliminating duplicate code
     // moves the bot from "current" cell to next cell in parameter, updates the GUI accordingly
-    private static void move(Cell next) {
+    public static void move(Cell next) {
         moves.push(current);
         try {
             Thread.sleep(500);

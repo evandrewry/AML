@@ -23,7 +23,7 @@ public class Cell extends JLabel
     private int column; // the column of the cell
     private int value; // value of the cell: 0 if spot is a "hole", 1 if walkable, 2 if start point, 3 if target
     private boolean visited; // whether or not the bot has visited this point
-
+    
     public Cell(int value, int r, int c)
     {
         setHorizontalAlignment(JLabel.CENTER);

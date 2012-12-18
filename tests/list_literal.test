@@ -1,5 +1,5 @@
 #!/bin/bash
 
 DESC="list literal"
-OUT="<[1,2,3]>"
+OUT="[1, 2, 3]"
 ERR=""

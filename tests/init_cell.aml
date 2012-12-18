@@ -2,6 +2,6 @@
 
 main():void
 {
-    Cell i := null;
+    cell i := null;
     print(i);
 }

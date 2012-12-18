@@ -1,6 +1,7 @@
 #!/bin/bash
 
 DESC="integer decl"
-OUT=""
-ERR=""
+OUT="i"
+ERR="Fatal error: exception Parsing.Parse_error"
+COMPILE_ONLY=true
 

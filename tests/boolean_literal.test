@@ -1,6 +1,6 @@
 #!/bin/bash
 
 DESC="boolean literals"
-OUT="True\nFalse"
+OUT=$'true\nfalse'
 ERR=""
 

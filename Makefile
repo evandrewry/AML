@@ -40,13 +40,13 @@ ast.cmo: ast.cmi
 ast.cmx: ast.cmi
 compile.cmo: ast.cmo 
 compile.cmx: ast.cmx 
+toplevel.cmo: sast.cmo scanner.cmo parser.cmi compile.cmo ast.cmi
+toplevel.cmx: sast.cmx scanner.cmx parser.cmx compile.cmx ast.cmx
 parser.cmo: ast.cmi parser.cmi 
 parser.cmx: ast.cmx parser.cmi 
-sast.cmo: ast.cmi
-sast.cmx: ast.cmx 
 scanner.cmo: parser.cmi 
 scanner.cmx: parser.cmx 
-toplevel.cmo: sast.cmo scanner.cmo parser.cmi compile.cmo ast.cmi
-toplevel.cmx: sast.cmx scanner.cmx parser.cmx compile.cmx ast.cmx  
-ast.cmi:
+sast.cmo: ast.cmi
+sast.cmx: ast.cmx 
 parser.cmi: ast.cmi
+ast.cmi:

@@ -1,5 +1,7 @@
 #!/bin/bash
 
 DESC="cell decl"
-OUT=""
-ERR=""
+OUT="syntax error"
+ERR="Fatal error: exception Parsing.Parse_error"
+COMPILE_ONLY=true
+

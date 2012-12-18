@@ -30,7 +30,7 @@ type expr =
 | Loc of string
 | Target of string
 | Src of string
-| Visit of string
+| Visit of expr
 | Pointer
 | Null
 
@@ -80,17 +80,17 @@ let string_of_dt = function
 
 let string_of_assoc = function
 		Remove -> "remove" 
-	| Next -> "next" 
-	| Head -> "head"
-	| Empty -> "empty"
+	| Next -> "clear" 
+	| Head -> "peek"
+	| Empty -> "isEmpty"
 	| Up  -> "up"
 	| Down -> "down"
 	| Left -> "left"
 	| Right -> "right"
-	| Hleft -> "hleft"
-	| Hright -> "hright"
-	| Htop -> "htop"
-	| Hbtm -> "hbtm"
+	| Hleft -> "hasLeft"
+	| Hright -> "hasRight"
+	| Htop -> "hasTop"
+	| Hbtm -> "hasBottom"
 		
 let rec string_of_rt = function
 	 Void -> "void"
@@ -140,12 +140,19 @@ let rec string_of_expr = function
 			end
 	| Assign(v, e) -> v ^ " = " ^ string_of_expr e
 	| Funcall(f, el) -> f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
-	| Assoc(f, e) ->  e ^ "." ^ string_of_assoc f ^"()" 
+	| Assoc(f, e) ->  begin
+											match f with
+											| Remove ->"(Cell)"^ e ^ "." ^ string_of_assoc f ^"()"
+											| Next -> e ^ "." ^ string_of_assoc f ^"()"
+											| Head -> "(Cell)"^ e ^ "." ^ string_of_assoc f ^"()"
+											| Empty -> e ^ "." ^ string_of_assoc f ^"()"
+											| _ ->  "AMLJava." ^ string_of_assoc f ^"()"
+										end
 	| Paran(e1) -> " ( " ^ string_of_expr e1 ^ " ) " 
-	| Loc(e) -> "get_Loc(" ^ e ^ ")"
-	| Target(e) -> "isTarget(" ^ e ^")"  
-	| Src(e) -> "isSource(" ^ e ^")"
-	| Visit(e) -> e ^ ".visited()"
+	| Loc(e) -> e^".get_Loc()"
+	| Target(e) -> e^".isTarget()"  
+	| Src(e) -> e^".isSource()"
+	| Visit(e) -> string_of_expr e ^ ".getVisited()"
 	| Pointer -> "AMLJava.current"
 	| Null -> "null"
 
@@ -169,7 +176,7 @@ let rec string_of_stmt = function
 	| Return(expr) -> "return " ^ string_of_expr expr ^ ";\n";
 	| If(e, s, StmtBlk([])) -> "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s
 	| If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s1 ^ "else\n" ^ string_of_stmt s2
-	| MoveTo(x) -> "AMLJava.Move_To(" ^ x ^")\n"
+	| MoveTo(x) -> "AMLJava.move(" ^ x ^");\n"
 	
 let string_of_vdecl = function 
 	Define(dtt, nm, v) ->  string_of_dt dtt ^ " " ^ nm ^ " = " ^ string_of_expr v ^ ";\n"

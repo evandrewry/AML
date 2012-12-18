@@ -71,7 +71,7 @@ rule token =
 | "CPos" { CUR_POS }
 | "add" { LISTADD }
 | "remove" { LISTREMOVE } 
-| "next" { LISTNEXT }
+| "clear" { LISTCLEAR }
 | "head" { LISTHEAD }
 | "isEmpty" { LISTEMPTY } 
 | ['-']?['1'-'9']digit*|'0' as amlex { NUM_LITERAL(int_of_string amlex) }
