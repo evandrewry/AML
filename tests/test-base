@@ -1,8 +1,8 @@
 #!/bin/bash
 
-function info()  { echo -e "\033[00;34m[INFO] $1\033[00m";    }
+function info()  { echo -e "\033[00;32m[INFO] $1\033[00m";    }
 
-function error() { echo -e "\033[00;33m[ERROR] $1\033[00m";   }
+function error() { echo -e "\033[00;31m[ERROR] $1\033[00m";   }
 
 function do_test() {
         TEST_NAME=`basename $1 .test`
@@ -113,5 +113,8 @@ function copydependencies() {
     fi
     if [ ! -f List.class ]; then
         cp ../../List.class .
+    fi
+    if [ ! -f maze ]; then
+        cp ../maze.txt ./maze
     fi
 }
