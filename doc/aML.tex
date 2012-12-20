@@ -83,7 +83,7 @@ If users wish to build a custom maze for the bot to navigate, then the maze text
 
 \begin{figure}[htb]
 \centering
-\includegraphics[height=80mm]{custommaze.png}
+\includegraphics[height=100mm]{custommaze.png}
 \caption{GUI representation of the text maze}
 \end{figure}
 
@@ -1196,7 +1196,7 @@ Keeping this in mind, the architecture of aML was designed as shown below tracin
 
 \begin{figure}[htb]
 \centering
-\includegraphics[height=80mm]{diagram.png}
+\includegraphics[height=100mm]{diagram.png}
 \caption{Block diagram of the aML translator}
 \end{figure}
 
@@ -1222,7 +1222,14 @@ For our test suite, we decided to include both unit and functional tests for max
 
 Functional tests are at the other end of the testing spectrum -- they validate not a simple input-to-output conversion, but rather the result of complex interactions between many parts of the code. An example functional test case could be something like a GCD algorithm or a simple search algorithm. The reason we need functional tests on top of unit tests is that there is no way to verify that the pieces of our code work properly \textit{together }if we use only unit testing, which verifies that the pieces of our code work properly \textit{apart}. 
 
-We decided to implement and automate our tests using bash script. All of this can be found in the tests subdirectory. Each individual test case has two components: (1) an aML source file containing the aML code relevant to the test case, and (2) a bash script file of the same name (but with a .test extension rather than a .aml extension) that contains the expected output from the test case as well as any other necessary information pertaining to the test case in question (for example, setting COMPILE\_ONLY=true if the test case is meant to cause an error on compilation). The bash file "test-base" contains all the functions necessary for automating the testing process, including functions to compile and run an individual test case, to print error/info data to the console, and to run the full suite at one time.
+Evan was responsible for writing and maintaining the test suite.  We decided to implement and automate our tests using bash script. All of this can be found in the tests subdirectory, and a listing of the bash test framework and all of our tests is provided in appendix 7.7. Each individual test case has two components: (1) an aML source file containing the aML code relevant to the test case, and (2) a bash script file of the same name (but with a .test extension rather than a .aml extension) that contains the expected output from the test case as well as any other necessary information pertaining to the test case in question (for example, setting COMPILE\_ONLY=true if the test case is meant to cause an error on compilation, or GUITEST=true if something needs to be tested with the maze visualization). The bash file "test-base" contains all the functions necessary for automating the testing process, including functions to compile and run an individual test case, to print error/info data to the console, and to run the full suite at one time.
+
+There are several executable command line tools (also written in bash) that automate the running of our test suite. The run-all-tests script runs every single test in the file, and takes the path to the aml compiler as an argument. The run-test script also takes the path to the aml compiler as an argument, but will only run tests specified on the command line. Example usage:
+\begin{lstlisting}[caption=run-test usage]
+./run-test ../aml gcd bfs binop_minus
+\end{lstlisting}
+This would only run the GCD, BFS, and minus operator tests. The source for these command line tools can also be found in appendix 7.7.
+
 
 
 \pagebreak
@@ -1249,15 +1256,14 @@ thinking at certain points during the project.
 \subsection{Sriramkumar Balasubramanian}
 \begin{itemize}
 \item
-Keep in frequent communication.
+The most important lesson that I took from this experience is that it is better to work systematically in small increments rather than finishing a lot of work in too little time. This is important as systematic work helps in catching all potential flaws early and the final system tends to be more robust than if it were finished quickly more often than not. 
+
 \item
-Start earlier than you will.
-\item
-Spread the work out.
-\item
-Sleepless coding is inefficient and/or error-prone.
+Also another critical point is to identify the modules and design the interfaces asap, so that team members do not get in the way of each other. Intelligent use of the repository is another must for managing time efficiently.
 
 \end{itemize}
+
+
 \subsection{Evan Drewry}
 \begin{itemize}
 \item
