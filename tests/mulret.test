@@ -2,5 +2,5 @@
 
 DESC="dead code; multiple returns"
 OUT=""
-ERR=""
+ERR='Fatal error: exception Failure("Multiple return statements")'
 COMPILE_ONLY=true

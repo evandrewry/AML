@@ -1,5 +1,5 @@
 #!/bin/bash
 
-DESC="gcd algorithm"
-OUT="7"
+DESC="recursive call"
+OUT=""
 ERR=""

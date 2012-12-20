@@ -111,7 +111,7 @@ function copydependencies() {
         cp ../../List.java .
         javac AMLJava.java
     fi
-    if [ ! -f maze ]; then
-        cp ../maze.txt ./maze
+    if [ ! -f maze.txt ]; then
+        cp ../maze.txt .
     fi
 }
