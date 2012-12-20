@@ -1,0 +1,4 @@
+#!/bash/bin
+
+. test-base
+clean
