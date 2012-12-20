@@ -1,0 +1,8 @@
+#!/bin/bash
+
+for x in  ./*
+do
+    echo -e "\\\\begin{lstlisting}[caption=$x]"
+    cat $x
+    echo -e "\\\\end{lstlisting}"
+done

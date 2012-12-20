@@ -1070,7 +1070,11 @@ aML was designed in such a fashion that the aML syntax was similar to the java s
 
 Keeping this in mind, the architecture of aML was designed as shown below tracing the steps from character streams typed by the user all the way to compiled java bytecode.
 
-
+\begin{figure}[htb]
+\centering
+\includegraphics[height=80mm]{diagram.png}
+\caption{Block diagram of the aML translator}
+\end{figure}
 
 \begin{enumerate}
 \item
@@ -3453,7 +3457,1244 @@ public class List extends LinkedList
 }
 \end{lstlisting}
 
+\subsection{Test Suite}
+\lstset{
+language=bash,
+basicstyle=\color{MidnightBlue}\footnotesize\ttfamily, % print whole listing small
+columns=fullflexible,
+keywordstyle=\color{violet}\bfseries,
+% underlined bold black keywords
+identifierstyle=\color{black}, % nothing happens
+commentstyle=\color{gray}, % white comments
+}
+\begin{lstlisting}[caption=test-base]
+#!/bin/bash
 
+function info()  { echo -e "\033[00;32m[INFO] $1\033[00m";    }
+
+function error() { echo -e "\033[00;31m[ERROR] $1\033[00m";   }
+
+function do_test() {
+        TEST_NAME=`basename $1 .test`
+        TEST_SRC=${TEST_NAME}.aml
+        COMPILE_ONLY=false
+        GUITEST=false
+
+        . ${TEST_NAME}.test
+
+        if [ ! -f "$TEST_SRC" ]; then
+            error "Source file '$TEST_SRC' not found."
+            return 1
+        fi
+
+        compile $TEST_NAME
+
+        if $COMPILE_ONLY; then
+            checkoutput $TEST_NAME
+            return $?
+        fi
+
+        if [ ! -f "./bin/$TEST_NAME.class" ]; then
+            error "Binary file 'bin/$TEST_NAME.class' not found."
+            return 1
+        fi
+
+        run $TEST_NAME
+        checkoutput $TEST_NAME
+        return $?
+}
+
+function run_all() {
+    for test in *.test
+    do
+        do_test $test
+    done
+}
+
+function compile() {
+	echo "Compiling '$1'..."
+    if [ ! -d "bin" ]; then
+        mkdir bin
+    fi
+    cd bin
+    copydependencies
+	../$AML_BINARY -c ../$1.aml >log_stdout 2>log_stderr
+    if [ -f "$1.java" ]; then
+        javac -classpath ../../ ./$1.java
+    fi
+    cd ..
+}
+
+function run() {
+	echo "Running '$1'..."
+    cd bin
+    if $GUITEST; then
+        java $1 >log_stdout 2>log_stderr
+    else
+        java $1 >log_stdout 2>log_stderr &
+        sleep 3
+        kill $!
+    fi
+    cd ..
+}
+
+function checkoutput() {
+    . $1.test
+
+    if [ -f bin/log_stdout ]; then
+        ACTUAL_OUT=`cat bin/log_stdout`
+    else
+        ACTUAL_OUT=""
+    fi
+
+    if [ -f bin/log_stderr ]; then
+        ACTUAL_ERR=`cat bin/log_stderr`
+    else
+        ACTUAL_ERR=""
+    fi
+
+    rm log_stdout &> /dev/null
+    rm log_stderr &> /dev/null
+
+
+    if [ "$OUT" = "$ACTUAL_OUT" ] && [ "$ERR" = "$ACTUAL_ERR" ]; then
+        info "$1 PASSED"
+        return 0
+    else
+        echo expected err: "$ERR"
+        echo actual err: "$ACTUAL_ERR"
+        echo expected out: "$OUT"
+        echo actual out: "$ACTUAL_OUT"
+        error "$1 FAILED"
+        return 1
+    fi
+}
+
+function clean() {
+    rm -rf bin
+}
+
+function copydependencies() {
+    if [ ! -f AMLJava.class ] || [ ! -f Cell.class ] || [ ! -f List.class ]; then
+        cp ../../AMLJava.java .
+        cp ../../Cell.java .
+        cp ../../List.java .
+        javac AMLJava.java
+    fi
+    if [ ! -f maze.txt ]; then
+        cp ../maze.txt .
+    fi
+}
+
+\end{lstlisting}
+\begin{lstlisting}[caption=run-all-tests]
+#!/bin/bash
+
+AML_BINARY=$1
+if [ ! -f "$1" ]; then
+    echo "Usage: run-all-tests <AML BINARY>"
+    exit 1
+fi
+. test-base
+run_all
+exit $?
+\end{lstlisting}
+\begin{lstlisting}[caption=run-test]
+#!/bin/bash
+
+if [ ! -f "$1" ] || [ $# -lt 2 ]; then
+    echo "Usage: run-test <AML-BINARY> <TEST-NAME>"
+    exit 1
+fi
+
+. test-base
+AML_BINARY=$1
+
+shift
+while [ $1 ]
+do
+    do_test $1.test
+    shift
+done
+exit $?
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[caption=./bfs.aml]
+#load<maze>
+
+main():void{
+	list<cell> toGo := <[]>;
+	cell node := (CPos);
+	toGo.add(node);
+	BFS(toGo);
+}
+
+function BFS (list<cell> toGo):void{
+	cell node := (CPos);
+	if(NOT toGo.isEmpty()){
+		node := toGo.remove();
+		if (isTarget(node)){
+			move_To(node);
+			toGo.clear();
+			exit();
+		};
+		if (visited(node) AND NOT isSource(node)){
+			BFS(toGo);
+		}
+		else{
+			move_To(node);
+			addToGo(node, toGo);
+			revert();
+			BFS(toGo);
+		}
+	};
+	
+}
+
+function addToGo(cell node, list<cell> toGo):void{
+	cell tempNode := (CPos);
+	if (node.hasleft()){
+		tempNode := node.left();
+		toGo.add(tempNode);
+	};
+	if (node.hastop()){
+		tempNode := node.up();
+		toGo.add(tempNode);
+	};
+	if (node.hasright()){
+		tempNode := node.right();
+		toGo.add(tempNode);
+	};
+	if (node.hasbottom()){
+		tempNode := node.down();
+		toGo.add(tempNode);
+	};
+}\end{lstlisting}
+\begin{lstlisting}[caption=./bfs.test]
+#!/bin/bash
+
+DESC="bfs algorithm"
+OUT=""
+ERR=""
+GUITEST=true
+\end{lstlisting}
+
+\begin{lstlisting}[caption=./binop\_divide.aml]
+#load<maze>
+
+main():void
+{
+    print(8/2);
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./binop\_divide.test]
+#!/bin/bash
+
+DESC="division binop"
+OUT="4"
+ERR=""
+\end{lstlisting}
+\begin{lstlisting}[caption=./binop\_minus.aml]
+#load<maze>
+
+main():void
+{
+    print(7 - 9);
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./binop\_minus.test]
+#!/bin/bash
+
+DESC="subtraction binop"
+OUT="-2"
+ERR=""
+\end{lstlisting}
+\begin{lstlisting}[caption=./binop\_modulo.aml]
+#load<maze>
+
+main():void
+{
+    print(9%7);
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./binop\_modulo.test]
+##!/bin/bash
+
+DESC="division binop"
+OUT="2"
+ERR=""
+\end{lstlisting}
+\begin{lstlisting}[caption=./binop\_multiply.aml]
+#load<maze>
+
+main():void
+{
+    print(7*9);
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./binop\_multiply.test]
+#!/bin/bash
+
+DESC="multiplication binop"
+OUT="63"
+ERR=""
+\end{lstlisting}
+\begin{lstlisting}[caption=./binop\_plus.aml]
+#load<maze>
+
+main():void
+{
+    print(7+9);
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./binop\_plus.test]
+#!/bin/bash
+
+DESC="addition binop"
+OUT="16"
+ERR=""
+\end{lstlisting}
+\begin{lstlisting}[caption=./binop\_power.aml]
+#load<maze>
+
+main():void
+{
+    print(2^4);
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./binop\_power.test]
+#!/bin/bash
+
+DESC="exponentiation binop"
+OUT="16.0"
+ERR=""
+\end{lstlisting}
+\begin{lstlisting}[caption=./bool\_and.aml]
+#load<maze>
+
+main():void
+{
+    print(true AND false);
+    print(true AND true);
+    print(false AND false);
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./bool\_and.test]
+#!/bin/bash
+
+DESC="AND binop"
+OUT=$'false\ntrue\nfalse'
+ERR=""
+\end{lstlisting}
+\begin{lstlisting}[caption=./boolean\_literal.aml]
+#load<maze>
+
+main():void
+{
+    print(true);
+    print(false);
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./boolean\_literal.test]
+#!/bin/bash
+
+DESC="boolean literals"
+OUT=$'true\nfalse'
+ERR=""
+
+\end{lstlisting}
+\begin{lstlisting}[caption=./bool\_eq.aml]
+#load<maze>
+
+main():void
+{
+    print(7 = 9);
+    print(7=7);
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./bool\_eq.test]
+#!/bin/bash
+
+DESC="== binop"
+OUT=$'false\ntrue'
+ERR=""
+\end{lstlisting}
+\begin{lstlisting}[caption=./bool\_gt.aml]
+#load<maze>
+
+main():void
+{
+    print(7>9);
+    print(7>7);
+    print(9>7);
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./bool\_gte.aml]
+#load<maze>
+
+main():void
+{
+    print(7>=9);
+    print(7>=7);
+    print(9>=7);
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./bool\_gte.test]
+#!/bin/bash
+
+DESC="gte binop"
+OUT=$'false\ntrue\ntrue'
+ERR=""
+\end{lstlisting}
+\begin{lstlisting}[caption=./bool\_gt.test]
+#!/bin/bash
+
+DESC="gt binop"
+OUT=$'false\nfalse\ntrue'
+ERR=""
+\end{lstlisting}
+\begin{lstlisting}[caption=./bool\_lt.aml]
+#load<maze>
+
+main():void
+{
+    print(7<9);
+    print(7<7);
+    print(9<7);
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./bool\_lte.aml]
+#load<maze>
+
+main():void
+{
+    print(7<=9);
+    print(7<=7);
+    print(9<=7);
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./bool\_lte.test]
+#!/bin/bash
+
+DESC="lte binop"
+OUT=$'true\ntrue\nfalse'
+ERR=""
+
+\end{lstlisting}
+\begin{lstlisting}[caption=./bool\_lt.test]
+#!/bin/bash
+
+DESC="lt binop"
+OUT=$'true\nfalse\nfalse'
+ERR=""
+
+\end{lstlisting}
+\begin{lstlisting}[caption=./bool\_ne.aml]
+#load<maze>
+
+main():void
+{
+    print(7~=9);
+    print(7~=7);
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./bool\_ne.test]
+#!/bin/bash
+
+DESC="ne binop"
+OUT=$'true\nfalse'
+ERR=""
+\end{lstlisting}
+\begin{lstlisting}[caption=./bool\_not.aml]
+#load<maze>
+
+main():void
+{
+    print(NOT false);
+    print(NOT true);
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./bool\_not.test]
+#!/bin/bash
+
+DESC="NOT op"
+OUT=$'true\nfalse'
+ERR=""
+
+\end{lstlisting}
+\begin{lstlisting}[caption=./bool\_or.aml]
+#load<maze>
+
+main():void
+{
+    print(true OR false);
+    print(true OR true);
+    print(false OR false);
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./bool\_or.test]
+#!/bin/bash
+
+DESC="OR binop"
+OUT=$'true\ntrue\nfalse'
+ERR=""
+
+\end{lstlisting}
+\begin{lstlisting}[caption=./clean-tests]
+#!/bash/bin
+
+. test-base
+clean
+\end{lstlisting}
+\begin{lstlisting}[caption=./cpos.aml]
+#load<maze>
+
+main():void
+{
+    cell i := (CPos);
+    print(get_Loc(i));
+}
+
+\end{lstlisting}
+\begin{lstlisting}[caption=./cpos.test]
+#!/bin/bash
+
+DESC="CPos variable"
+OUT="8"
+ERR=""
+\end{lstlisting}
+\begin{lstlisting}[caption=./decl\_boolean.aml]
+#load<maze>
+
+main():void
+{
+    Boolean i;
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./decl\_boolean.test]
+#!/bin/bash
+
+DESC="boolean decl"
+OUT="syntax error"
+ERR="Fatal error: exception Parsing.Parse_error"
+COMPILE_ONLY=true
+\end{lstlisting}
+\begin{lstlisting}[caption=./decl\_cell.aml]
+#load<maze>
+
+main():void
+{
+    Cell i;
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./decl\_cell.test]
+#!/bin/bash
+
+DESC="cell decl"
+OUT="syntax error"
+ERR="Fatal error: exception Parsing.Parse_error"
+COMPILE_ONLY=true
+
+\end{lstlisting}
+\begin{lstlisting}[caption=./decl\_integer.aml]
+#load<maze>
+
+main():void
+{
+    Integer i;
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./decl\_integer.test]
+#!/bin/bash
+
+DESC="integer decl"
+OUT="syntax error"
+ERR="Fatal error: exception Parsing.Parse_error"
+COMPILE_ONLY=true
+
+\end{lstlisting}
+\begin{lstlisting}[caption=./decl\_list.aml]
+#load<maze>
+
+main():void
+{
+    List i;
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./decl\_list.test]
+#!/bin/bash
+
+DESC="list decl"
+OUT="syntax error"
+ERR="Fatal error: exception Parsing.Parse_error"
+COMPILE_ONLY=true
+
+\end{lstlisting}
+\begin{lstlisting}[caption=./dfs.aml]
+#load<maze>
+
+main():void{
+	DFS();
+} 
+
+function DFS():void{
+	cell node := (CPos);
+	
+	if (isTarget(node)){
+		exit();
+	};
+	
+	if(myvisited(node)){
+		DFS();
+	}
+	else{
+		if (isSource(node)){
+			exit();
+		};
+
+		revert();
+		DFS();
+	}
+}
+
+
+function myvisited(cell node):bool{
+	if (node.hasleft() AND NOT visited(node.left())){
+		move_L();
+	}
+	else{
+		if(node.hastop() AND NOT visited(node.up())){
+			move_U();
+		}
+		else{
+			if (node.hasright() AND NOT visited(node.right())) {
+				move_R();
+			}
+			else{
+				if(node.hasbottom() AND NOT visited(node.down())){
+					move_D();
+				}
+				else{
+					return false;
+				}
+			}
+		}
+	}
+	return true;
+}\end{lstlisting}
+\begin{lstlisting}[caption=./dfs.test]
+#!/bin/bash
+
+DESC="dfs algorithm"
+OUT=""
+ERR=""
+GUITEST=true
+\end{lstlisting}
+\begin{lstlisting}[caption=./divide\_by\_zero.aml]
+#load<maze>
+
+main():void
+{
+    print(4/0);
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./divide\_by\_zero.test]
+#!/bin/bash
+
+DESC="divide by zero"
+OUT=""
+ERR='Exception in thread "main" java.lang.ArithmeticException: / by zero
+	at divide_by_zero.main(divide_by_zero.java:6)'
+\end{lstlisting}
+\begin{lstlisting}[caption=./empty\_program.aml]
+\end{lstlisting}
+\begin{lstlisting}[caption=./empty\_program.test]
+#!/bin/bash
+
+DESC="empty file"
+OUT=""
+ERR='Fatal error: exception Failure("hd")'
+COMPILE_ONLY=true
+\end{lstlisting}
+\begin{lstlisting}[caption=./factorial.aml]
+#load-random
+
+main():void{
+	integer n := 10;
+	print(fac(n));
+}
+
+function fac(integer n):integer{
+	if(n=1){
+		return 1;
+	}
+	else{
+		return n*fac(n - 1);
+	}
+
+}\end{lstlisting}
+\begin{lstlisting}[caption=./factorial.test]
+#!/bin/bash
+
+DESC="factorial algorithm"
+OUT="3628800"
+ERR=""
+\end{lstlisting}
+\begin{lstlisting}[caption=./function\_after\_main.aml]
+#load<maze>
+
+main():void
+{
+    func();
+}
+
+function func():void
+{
+    print(true);
+}
+
+\end{lstlisting}
+\begin{lstlisting}[caption=./function\_after\_main.test]
+#!/bin/bash
+
+DESC="function after main"
+OUT="true"
+ERR=""
+\end{lstlisting}
+\begin{lstlisting}[caption=./function\_before\_main.aml]
+#load<maze>
+
+function func():void
+{
+    print(true);
+}
+
+main():void
+{
+    func();
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./function\_before\_main.test]
+#!/bin/bash
+
+DESC="function before main"
+OUT=""
+ERR='Fatal error: exception Failure("'"'main'"' must be after load")'
+COMPILE_ONLY=true
+\end{lstlisting}
+\begin{lstlisting}[caption=./function\_bool.aml]
+#load<maze>
+
+main():void
+{
+    print(func());
+}
+
+function func():bool
+{
+    return true;
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./function\_bool.test]
+#!/bin/bash
+
+DESC="boolean function"
+OUT="true"
+ERR=""
+\end{lstlisting}
+\begin{lstlisting}[caption=./function\_int.aml]
+#load<maze>
+
+main():void
+{
+    print(func());
+}
+
+function func():integer
+{
+    return 5;
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./function\_int.test]
+#!/bin/bash
+
+DESC="int function"
+OUT="5"
+ERR=""
+\end{lstlisting}
+\begin{lstlisting}[caption=./gcd.aml]
+#load<maze>
+main():void
+{
+    integer x := gcd(7,49);
+    print(x);
+    exit();
+}
+
+function gcd(integer n, integer m):integer
+{
+    if(n = m) {
+        return n;
+    } else {
+        if (n > m) {
+            return gcd(n - m, m); 
+        } else {
+            return gcd(m - n,n);
+        }
+    }
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./gcd.test]
+#!/bin/bash
+
+DESC="gcd algorithm"
+OUT="7"
+ERR=""
+\end{lstlisting}
+
+\begin{lstlisting}[caption=./init\_boolean.aml]
+#load<maze>
+
+main():void
+{
+    bool i := true;
+    print(i);
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./init\_boolean.test]
+#!/bin/bash
+
+DESC="initialize a boolean"
+OUT="true"
+ERR=""
+\end{lstlisting}
+\begin{lstlisting}[caption=./init\_cell.aml]
+#load<maze>
+
+main():void
+{
+    cell i := (CPos);
+    get_Loc(i);
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./init\_cell.test]
+#!/bin/bash
+
+DESC="initialize a cell"
+OUT=""
+ERR=""
+\end{lstlisting}
+\begin{lstlisting}[caption=./init\_integer.aml]
+#load<maze>
+
+main():void
+{
+    integer i := 5;
+    print(i);
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./init\_integer.test]
+#!/bin/bash
+
+DESC="initialize an int"
+OUT="5"
+ERR=""
+\end{lstlisting}
+\begin{lstlisting}[caption=./init\_list.aml]
+#load<maze>
+
+main():void
+{
+    list<integer> i := <[1,2,3]>;
+    print(i);
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./init\_list.test]
+#!/bin/bash
+
+DESC="initialize a list"
+OUT="[1, 2, 3]"
+ERR=""
+\end{lstlisting}
+\begin{lstlisting}[caption=./integer\_literal.aml]
+#load<maze>
+
+main():void
+{
+    print(7);
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./integer\_literal.test]
+#!/bin/bash
+
+DESC="integer literal"
+OUT="7"
+ERR=""
+
+\end{lstlisting}
+\begin{lstlisting}[caption=./invalid\_return\_type.aml]
+#load<maze>
+
+main():void
+{
+}
+
+foo():int
+{
+    return 1;
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./invalid\_return\_type.test]
+#!/bin/bash
+
+DESC="invalid type"
+OUT="syntax error"
+ERR="Fatal error: exception Parsing.Parse_error"
+COMPILE_ONLY=true
+
+\end{lstlisting}
+\begin{lstlisting}[caption=./keyword\_as\_identifier2.aml]
+#load<maze>
+
+main():void
+{
+    Integer source := 7;
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./keyword\_as\_identifier2.test]
+#!/bin/bash
+
+DESC="keyword as identifier"
+OUT="syntax error"
+ERR="Fatal error: exception Parsing.Parse_error"
+COMPILE_ONLY=true
+
+\end{lstlisting}
+\begin{lstlisting}[caption=./keyword\_as\_identifier.aml]
+#load<maze>
+
+main():void
+{
+    Integer print := 7;
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./keyword\_as\_identifier.test]
+#!/bin/bash
+
+DESC="keyword as identifier"
+OUT="syntax error"
+ERR="Fatal error: exception Parsing.Parse_error"
+COMPILE_ONLY=true
+
+\end{lstlisting}
+\begin{lstlisting}[caption=./list\_literal.aml]
+#load<maze>
+
+main():void
+{
+    print(<[1,2,3]>);
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./list\_literal.test]
+#!/bin/bash
+
+DESC="list literal"
+OUT="[1, 2, 3]"
+ERR=""
+\end{lstlisting}
+\begin{lstlisting}[caption=./load\_missing\_maze.aml]
+#load<bogus>
+
+main():void
+{
+    cell i := (CPos);
+    print(get_Loc(i));
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./load\_missing\_maze.test]
+#!/bin/bash
+
+DESC="attempts to load a missing maze"
+OUT=""
+ERR='Exception in thread "main" java.lang.NullPointerException
+	at load_missing_maze.main(load_missing_maze.java:7)'
+OUT="File Not Found"
+\end{lstlisting}
+\begin{lstlisting}[caption=./main\_with\_args.aml]
+#load<maze>
+
+main(Integer x):void
+{
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./main\_with\_args.test]
+#!/bin/bash
+
+DESC="main with args"
+OUT="syntax error"
+ERR="Fatal error: exception Parsing.Parse_error"
+COMPILE_ONLY=true
+
+\end{lstlisting}
+\begin{lstlisting}[caption=./maze.txt]
+6 3
+
+0 0 1 0 1 1
+1 1 2 1 0 0
+1 1 3 0 0 1
+\end{lstlisting}
+\begin{lstlisting}[caption=./mazevis.aml]
+#load<maze>
+
+main():void{
+	exit();
+}\end{lstlisting}
+\begin{lstlisting}[caption=./mazevis.test]
+#!/bin/bash
+
+DESC="dfs algorithm"
+OUT=""
+ERR=""
+GUITEST=true
+\end{lstlisting}
+\begin{lstlisting}[caption=./missing\_return\_type.aml]
+#load<maze>
+
+main()
+{
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./missing\_return\_type.test]
+#!/bin/bash
+
+DESC="missing return type"
+OUT="syntax error"
+ERR="Fatal error: exception Parsing.Parse_error"
+COMPILE_ONLY=true
+
+\end{lstlisting}
+\begin{lstlisting}[caption=./missing\_semicolon.aml]
+#load<maze>
+
+main():void
+{
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./missing\_semicolon.test]
+#!/bin/bash
+
+DESC="missing semicolon"
+OUT="syntax error"
+ERR="Fatal error: exception Parsing.Parse_error"
+COMPILE_ONLY=true
+
+\end{lstlisting}
+\begin{lstlisting}[caption=./mulret.aml]
+#load-random
+
+main():void{
+	fn(1);
+}
+
+function fn(integer n):integer{
+	return 1;
+	n := 2;
+	return 3;
+}\end{lstlisting}
+\begin{lstlisting}[caption=./mulret.test]
+#!/bin/bash
+
+DESC="dead code; multiple returns"
+OUT=""
+ERR='Fatal error: exception Failure("Multiple return statements")'
+COMPILE_ONLY=true
+\end{lstlisting}
+\begin{lstlisting}[caption=./multi\_line\_comment.aml]
+#load<maze>
+
+main():void
+{
+/* this is
+ * a multiline
+ * comment
+ */
+    print(true);
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./multi\_line\_comment.test]
+#!/bin/bash
+
+DESC="multiline comment"
+OUT="true"
+ERR=""
+
+\end{lstlisting}
+\begin{lstlisting}[caption=./nested\_multi\_line\_comment.aml]
+#load<maze>
+
+main():void
+{
+/* this is a 
+ *
+/* this is
+ * a multiline
+ * comment
+ */
+ * multiline
+ * comments do 
+ * not nest
+ */
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./nested\_multi\_line\_comment.test]
+#!/bin/bash
+
+DESC="nested multiline comment"
+OUT="syntax error"
+ERR="Fatal error: exception Parsing.Parse_error"
+COMPILE_ONLY=true
+
+\end{lstlisting}
+\begin{lstlisting}[caption=./no\_main.aml]
+#load<maze>
+
+foo():void
+{
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./no\_main.test]
+#!/bin/bash
+
+DESC="no main method"
+OUT="syntax error"
+ERR="Fatal error: exception Parsing.Parse_error"
+COMPILE_ONLY=true
+
+\end{lstlisting}
+\begin{lstlisting}[caption=./non\_void\_main.aml]
+#load<maze>
+
+main():Boolean
+{
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./non\_void\_main.test]
+#!/bin/bash
+
+DESC="non-void main"
+OUT="syntax error"
+ERR="Fatal error: exception Parsing.Parse_error"
+COMPILE_ONLY=true
+
+\end{lstlisting}
+\begin{lstlisting}[caption=./no\_preprocessor.aml]
+main():void
+{
+
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./no\_preprocessor.test]
+#!/bin/bash
+
+DESC="missing preprocessor map load"
+OUT="syntax error"
+ERR="Fatal error: exception Parsing.Parse_error"
+COMPILE_ONLY=true
+
+\end{lstlisting}
+\begin{lstlisting}[caption=./order\_of\_operations.aml]
+#load<maze>
+
+main():void
+{
+    print(7+9/3^0);
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./order\_of\_operations.test]
+#!/bin/bash
+
+DESC="order of operations"
+OUT="16.0"
+ERR=""
+\end{lstlisting}
+\begin{lstlisting}[caption=./rec.aml]
+#load-random
+
+main():void{
+	rec();
+}
+
+function rec():void{
+	move_R();
+	move_D();
+	rec();
+}\end{lstlisting}
+\begin{lstlisting}[caption=./rec.test]
+#!/bin/bash
+
+DESC="recursive call"
+OUT=""
+ERR=""
+\end{lstlisting}
+\begin{lstlisting}[caption=./returns\_wrong\_type.aml]
+#load<maze>
+
+main():void
+{
+    return 3;
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./returns\_wrong\_type.test]
+#!/bin/bash
+
+DESC="returns wrong type"
+OUT=""
+ERR='Fatal error: exception Failure("Return statement is not permitted in main method")'
+COMPILE_ONLY=true
+\end{lstlisting}
+
+
+\begin{lstlisting}[caption=./single\_line\_comment.aml]
+#load<maze>
+
+main():void
+//this is a single line comment
+{
+    print(true);
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./single\_line\_comment.test]
+#!/bin/bash
+
+DESC="single-line comment"
+OUT="true"
+ERR=""
+COMPILE_ONLY=false
+\end{lstlisting}
+
+\begin{lstlisting}[caption=./wrongtype.aml]
+#load-random
+
+main():void
+{
+	bool x := fn();
+	exit();
+}
+
+function fn():bool{
+	return 1;
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=./wrongtype.test]
+#!/bin/bash
+
+DESC="wrong type"
+OUT=""
+ERR='Fatal error: exception Failure("return type mismatch")'
+COMPILE_ONLY=true
+\end{lstlisting}
 
 
 \end{document}
