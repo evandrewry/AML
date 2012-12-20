@@ -1,4 +1,4 @@
-#load-random
+#load<maze>
 
 function func():void
 {

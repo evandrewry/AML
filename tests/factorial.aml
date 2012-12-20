@@ -1,0 +1,16 @@
+#load-random
+
+main():void{
+	integer n := 10;
+	print(fac(n));
+}
+
+function fac(integer n):integer{
+	if(n=1){
+		return 1;
+	}
+	else{
+		return n*fac(n - 1);
+	}
+
+}

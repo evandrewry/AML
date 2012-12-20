@@ -199,6 +199,9 @@ let string_of_fdecl  = function
 			String.concat "" (List.map string_of_vdecl fdecl.mainVars) ^
 			String.concat "" (List.map string_of_stmt fdecl.body) ^
 			"}\n"
-	| Load(str) -> "public static void main(String[] args){\nAMLJava.buildMaze(\""^ str ^"\");"
-
+	| Load(str) -> begin 
+									match str with
+									| "random" -> "public static void main(String[] args){\nAMLJava.buildMaze(\""^ str ^"\");"
+									| _ -> "public static void main(String[] args){\nAMLJava.buildMaze(\""^ str ^".txt\");"
+								end
 let string_of_program (funcs) prog_name = "import java.util.*;\n\npublic class " ^ prog_name ^ "{\n" ^ (String.concat "\n" (List.map string_of_fdecl funcs)) ^ "}" 

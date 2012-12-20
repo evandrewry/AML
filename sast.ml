@@ -4,11 +4,11 @@ type env = {
 	mutable functions : funcs list ;
 }
 
-let equal_function_names id = function
+let eql_fname id = function
   Func(fn) -> fn.funcId = id
 | _ -> false
 
-let equal_main_names id = function
+let eql_mname id = function
 	Main(fn) -> fn.mainId = id
 | _ -> false
 	
@@ -28,7 +28,7 @@ let rec count_fn_id id = function
 							end
 	
 (*determines if the given function exists*)
-let exists_function func env =
+let isFunction func env =
 	let id = (match func with Func(f) -> f.funcId|Main(f) -> f.mainId | _ -> "_DNE") in
 			if count_fn_id id env.functions = 1 then
 				true
@@ -37,51 +37,51 @@ let exists_function func env =
 					raise (Failure e)
 
 (*Determine if a function with given name exists*)
-let exists_function_name id env = List.exists (equal_function_names id) env.functions
+let isFunction_name id env = List.exists (eql_fname id) env.functions
 
-let exists_main_name id env = List.exists (equal_main_names id) env.functions
+let isMain_name id env = List.exists (eql_mname id) env.functions
 
 (*Returns the function that has the given name*)
-let get_function_name id env =
+let getFunc_fname id env =
 	try
-		let afunc = List.find (equal_function_names id) env.functions in
+		let afunc = List.find (eql_fname id) env.functions in
 			afunc (*Found a function with name like that*)
 	with Not_found -> raise(Failure("Function " ^ id ^ "has not yet been declared" ) )
 
 let get_main id env =
 	try
-		let afunc = List.find (equal_function_names id) env.functions in
+		let afunc = List.find (eql_fname id) env.functions in
 			afunc
 	with Not_found -> raise(Failure(id ^ "has not yet been declared" ) )
 
 (*this is for generic functions only*)
-let cexists_formal_param func fpname = List.exists (function FormalVar(_,name) -> name = fpname) func.formalArgs
+let is_formal_param func fpname = List.exists (function FormalVar(_,name) -> name = fpname) func.formalArgs
 
 (*Determines if a formal parameter with the given name 'fpname' exists in the given function*)
 let exists_formal_param func fpname =
 	match func with
-	| Func(func) -> cexists_formal_param func fpname
+	| Func(func) -> is_formal_param func fpname
 	| _ -> false (*not applicable*)
 
 (*for generic functions only*)
-let cexists_variable_decl func vname = List.exists (function Define(_,name,_) -> name = vname) func.localVars
+let is_variable_decl func vname = List.exists (function Define(_,name,_) -> name = vname) func.localVars
 
-let cexists_variable_decl_main func vname = List.exists (function Define(_,name,_) -> name = vname) func.mainVars
+let is_variable_decl_main func vname = List.exists (function Define(_,name,_) -> name = vname) func.mainVars
 
 
 (*Determines if a variable declaration with the given name 'vname' exists in the given functioin*)
 let exists_variable_decl func vname =
 	match func with
-	| Func(func) -> cexists_variable_decl func vname
+	| Func(func) -> is_variable_decl func vname
 	| _ -> false 
 	
 (*this gets formal paramters for a generic function*)
-let get_cfparam_type func fpname =
+let get_fpdt func fpname =
 	try
 		let fparam = List.find (function FormalVar(_,name) -> name = fpname) func.formalArgs in
 			let FormalVar(dt,_) = fparam in
 				dt (*return the data type*)
-	with Not_found -> raise (Failure ("Formal Parameter " ^ fpname ^ " should exist but was not found in compute function " ^ func.funcId)) (*this shouldn't not happen*)
+	with Not_found -> raise (Failure ("Formal Parameter " ^ fpname ^ " should exist but was not found in  function " ^ func.funcId)) (*this shouldn't not happen*)
 
 (*gets the variable type - only for generic functions*)
 let get_var_type func vname =
@@ -100,7 +100,7 @@ let get_var_type_main func vname =
 
 
 let get_type_main main name =
-	if cexists_variable_decl_main main name (*It's a variable*)
+	if is_variable_decl_main main name (*It's a variable*)
 		then get_var_type_main main name
 	else
 		let e = "Variable " ^ name ^ " is being used without being declared in main " ^ main.mainId in
@@ -108,28 +108,28 @@ let get_type_main main name =
 
 (*Returns the type of a given variable name *)
 let get_type func name =
-	if cexists_variable_decl func name (*It's a variable*)
+	if is_variable_decl func name (*It's a variable*)
 		then get_var_type func name
 	else
-		if cexists_formal_param func name then
-			get_cfparam_type func name
+		if is_formal_param func name then
+			get_fpdt func name
 		else (*Variable has not been declared as it was not found*)
 			let e = "Variable " ^ name ^ " is being used without being declared in function " ^ func.funcId in
 				raise (Failure e)
 
 (*Determines if the given identifier exists*)
-let exists_id name func = (cexists_variable_decl func name) or (cexists_formal_param func name)
+let exists_id name func = (is_variable_decl func name) or (is_formal_param func name)
 
-let exists_id_main name func = (cexists_variable_decl_main func name) 
+let exists_id_main name func = (is_variable_decl_main func name) 
 
 (*see if there is a function with given name "func"*)
 let find_function func env =
 	try
-		let _ = List.find (equal_function_names func) env.functions in
+		let _ = List.find (eql_fname func) env.functions in
 			true (*return true on success*)
 	with Not_found -> raise Not_found
 
-let dup_fparam_single func = function
+let isDup_fp_single func = function
 	FormalVar(_,my_name) ->
 		function c ->
 			function FormalVar(_,name) ->
@@ -142,8 +142,8 @@ let dup_fparam_single func = function
 					else c
 
 (*This check for duplicate formal parameters in a function*)
-let cdup_fparam func =
-	let isdup f = List.fold_left (dup_fparam_single func f) 0 func.formalArgs
+let cisDup_fp func =
+	let isdup f = List.fold_left (isDup_fp_single func f) 0 func.formalArgs
 	in let _ = List.map isdup func.formalArgs
 	in false
 
@@ -155,7 +155,7 @@ let dup_vdecl_single func = function
 					then
 						if c = 0
 							then c+1
-							else let e = "Duplicate variable declaration '"^ mn ^"' in compute function : " ^ func.funcId  in
+							else let e = "Duplicate variable declaration '"^ mn ^"' in function : " ^ func.funcId  in
 								raise (Failure e) (*throw error on duplicate formal parameter.*)
 					else c
 
@@ -170,7 +170,7 @@ let dup_vdecl = function
 				List.map (
 					function FormalVar(_,formal_nm) ->
 						if formal_nm = varname
-							then let e = "Redeclaration of formal parameter '" ^ formal_nm ^"' not allowed in function : " ^ func.funcId ^"\n" in
+							then let e = "Redeclaring a formal parameter '" ^ formal_nm ^"' not allowed in function : " ^ func.funcId ^"\n" in
 								raise(Failure e)
 						else false
 				) func.formalArgs
@@ -211,7 +211,7 @@ let rec is_num func env = function
 							 end 
 	| Id(s) -> (function Integer -> true |  _ -> false) (get_type func s)
 	| BinOpr(_,e1,e2) -> (is_num func env e1) && (is_num func env e2)
-	| Funcall(f,_) -> let fn = (get_function_name f) env in 
+	| Funcall(f,_) -> let fn = (getFunc_fname f) env in 
 												begin
 													match fn with 
 														| Func(f) -> (string_of_rt f.reType) = (string_of_dt Integer)
@@ -227,7 +227,7 @@ let rec is_num_main func env = function
 							 end 
 	| Id(s) -> (function Integer -> true |  _ -> false) (get_type_main func s)
 	| BinOpr(_,e1,e2) -> (is_num_main func env e1) && (is_num_main func env e2)
-	| Funcall(f,_) -> let fn = (get_function_name f) env in 
+	| Funcall(f,_) -> let fn = (getFunc_fname f) env in 
 												begin
 													match fn with 
 														| Func(f) -> (string_of_rt f.reType) = (string_of_dt Integer)
@@ -292,7 +292,7 @@ let rec get_expr_type e func env=
 					| Data(Integer),Data(Integer) -> Data(Bool)
 					| _,_ -> raise (Failure "Invalid Types used in a relational expression")
 				end
-		| Funcall(fname,expr) -> let fn = get_function_name fname env in 
+		| Funcall(fname,expr) -> let fn = getFunc_fname fname env in 
 															begin
 																match fn with 
 																| Func(f) -> f.reType
@@ -405,12 +405,6 @@ let rec get_expr_type_main e func env=
 								else
 										raise(Failure("Invalid expression "^ b))	
 		| Null -> Void
-		
-(*Checks if the given expression is a valid  assignment / call expression*)
-let is_assign_call func = function
-	  Assign(_,_) -> true
-	| Funcall(_,_) -> true
-	| _ -> false
 
 (*Makes sure that the given arguments in a function call match the function signature*)
 (*fname of function being called*)
@@ -437,7 +431,7 @@ let rec check_types_argsmain cfunc env formalArgs = function
 							end
 
 let check_types fname exprlist cfunc env =
-	let func = get_function_name fname env in
+	let func = getFunc_fname fname env in
 		match func with
  			Func(func) ->
 					if List.length exprlist = List.length func.formalArgs then
@@ -450,7 +444,7 @@ let check_types fname exprlist cfunc env =
 		  | _ -> true
 
 let check_types_main fname exprlist cfunc env =
-	let func = get_function_name fname env in
+	let func = getFunc_fname fname env in
 		match func with
  			Func(func) ->
 					if List.length exprlist = List.length func.formalArgs then
@@ -476,7 +470,7 @@ let valid_vdecl func env =
 														match value with 
 														| Vars(f) -> if is_list f then true else raise (Failure e)
 														| Id(f) -> if (get_type func f) = List(g) then true else raise (Failure e)
-														| Funcall(fname,list) -> let fn = (get_function_name fname) env in 
+														| Funcall(fname,list) -> let fn = (getFunc_fname fname) env in 
 														  									begin
 																									match fn with 
 																									| Func(f1) -> if (string_of_rt f1.reType) = (string_of_dt dt) then 
@@ -497,7 +491,7 @@ let valid_vdecl func env =
 																					| _ -> raise (Failure e)
 																			 	 end
 													  | Id(f) -> if (get_type func f) = Integer then true else raise (Failure e)
-														| Funcall(fname,list) -> let fn = (get_function_name fname) env in 
+														| Funcall(fname,list) -> let fn = (getFunc_fname fname) env in 
 														  									begin
 																									match fn with 
 																									| Func(f1) -> if (string_of_rt f1.reType) = (string_of_dt dt) then 
@@ -518,7 +512,7 @@ let valid_vdecl func env =
 																					| _ -> raise (Failure be)
 																			 	 end
 													  | Id(f) -> if (get_type func f) = Bool then true else raise (Failure be)
-														| Funcall(fname,list) -> let fn = (get_function_name fname) env in 
+														| Funcall(fname,list) -> let fn = (getFunc_fname fname) env in 
 														  									begin
 																									match fn with 
 																									| Func(f1) -> if (string_of_rt f1.reType) = (string_of_dt dt) then 
@@ -543,7 +537,7 @@ let valid_vdecl func env =
 														match value with 
 														| Vars(f) -> if is_list f then true else raise (Failure e)
 														| Id(f) -> if (get_type_main func f) = List(g) then true else raise (Failure e)
-														| Funcall(fname,list) -> let fn = (get_function_name fname) env in 
+														| Funcall(fname,list) -> let fn = (getFunc_fname fname) env in 
 														  									begin
 																									match fn with 
 																									| Func(f1) -> if (string_of_rt f1.reType) = (string_of_dt dt) then 
@@ -564,7 +558,7 @@ let valid_vdecl func env =
 																					| _ -> raise (Failure e)
 																			 	 end
 													  | Id(f) -> if (get_type_main func f) = Integer then true else raise (Failure e)
-														| Funcall(fname,list) -> let fn = (get_function_name fname) env in 
+														| Funcall(fname,list) -> let fn = (getFunc_fname fname) env in 
 														  									begin
 																									match fn with 
 																									| Func(f1) -> if (string_of_rt f1.reType) = (string_of_dt dt) then 
@@ -585,7 +579,7 @@ let valid_vdecl func env =
 																					| _ -> raise (Failure be)
 																			 	 end
 													  | Id(f) -> if (get_type_main func f) = Bool then true else raise (Failure be)
-													| Funcall(fname,list) -> let fn = (get_function_name fname) env in 
+													| Funcall(fname,list) -> let fn = (getFunc_fname fname) env in 
 														  									begin
 																									match fn with 
 																									| Func(f1) -> if (string_of_rt f1.reType) = (string_of_dt dt) then 
@@ -715,7 +709,7 @@ let rec valid_expr (func : Ast.func) expr env =
 					| Cell, Data(Cell) -> true
 					| _,_ -> raise(Failure ("DataTypes do not match up in an assignment expression to variable " ^ id))
 				else raise( Failure ("Undeclared identifier " ^ id ^ " is used" ))
-	| Funcall(fname, exprlist) -> if exists_function_name fname env then
+	| Funcall(fname, exprlist) -> if isFunction_name fname env then
 																	let _has_valid_exprs = List.map (fun e -> valid_expr func e env) exprlist in
 																		if check_types fname exprlist func env then (*check that the types match up otherwise throws an error *)
 																			true
@@ -760,7 +754,7 @@ let rec valid_expr_main (func : Ast.main) expr env =
 					| Cell, Data(Cell) -> true
 					| _,_ -> raise(Failure ("DataTypes do not match up in an assignment expression to variable " ^ id))
 				else raise( Failure ("Undeclared identifier " ^ id ^ " is used" ))
-	| Funcall(fname, exprlist) -> if exists_function_name fname env then
+	| Funcall(fname, exprlist) -> if isFunction_name fname env then
 																	let _has_valid_exprs = List.map (fun e -> valid_expr_main func e env) exprlist in
 																		if check_types_main fname exprlist func env then (*check that the types match up otherwise throws an error *)
 																			true
@@ -788,7 +782,7 @@ let dup_letter_single func = function
 								raise (Failure e) (*throw error on duplicate formal parameter.*)
 					else c
 
-(*Checks the body of a compute function *)
+(*Checks the body of a  function/main *)
 let valid_body func env =
 	match func with
 		| Func(func) ->
@@ -865,25 +859,25 @@ let valid_body func env =
 								in
 									if (check_stmt stmt1) && (check_stmt stmt2)
 										then true
-										else raise(Failure("Invalid expression used in if statement in compute function " ^ func.mainId ^ "\n"))
+										else raise(Failure("Invalid expression used in if statement in function " ^ func.mainId ^ "\n"))
 				in
 					let _ = List.map(check_stmt) func.body in
 						true
 		| _ -> true
 		
 
-let cdup_fparam func =
-	let isdup f = List.fold_left (dup_fparam_single func f) 0 func.formalArgs
+let cisDup_fp func =
+	let isdup f = List.fold_left (isDup_fp_single func f) 0 func.formalArgs
 	in let _ = List.map isdup func.formalArgs
 	in false
 
-let dup_fparam = function
-| Func(func) -> cdup_fparam func
+let isDup_fp = function
+| Func(func) -> cisDup_fp func
 | _ -> true
 
 let check_function f env =
-	let dup_fname = exists_function f env in
-		let dup_formals = dup_fparam f in
+	let dup_fname = isFunction f env in
+		let dup_formals = isDup_fp f in
 			let vlocals = (not (dup_vdecl f)) && (valid_vdecl f env) (*make sure that we've no dup variable names, and data types match up*) in
 				let vbody = valid_body f env in
 				  let vret = valid_return_stmt env f in
@@ -891,7 +885,7 @@ let check_function f env =
 							(not dup_fname) && (not dup_formals) && vlocals && vbody &&vret
 
 let check_main f env =
-	let dup_fname = exists_function f env in
+	let dup_fname = isFunction f env in
 		let vlocals = (not (dup_vdecl f)) && (valid_vdecl f env) in
 			let vbody = valid_body f env in
 				let vret = valid_return_stmt env f in
@@ -905,8 +899,8 @@ let valid_func env = function
 
 (*Checks to make sure that the main function exists*)
 let exists_main env =
-	if (exists_main_name "main" env) then
-	 	if not (exists_function_name "main" env) then
+	if (isMain_name "main" env) then
+	 	if not (isFunction_name "main" env) then
 			true
 		else 
 			raise(Failure("A generic function cannot be called 'Main'"))
@@ -930,11 +924,11 @@ let checkLoad list = begin
 											| _ -> raise(Failure("'load' must be at the start of the program"))
 										end
 
-let check_program flist =
-	let (environment : env) = { functions = flist} in
-		let _loadchecker = numLoad flist = 1 in 
-			let _loadmain = checkLoad flist in 
-				let _dovalidation = List.map ( fun(f) -> valid_func environment f) flist in (*Do the semantic analysis*)
-			 			let _mainexists = exists_main environment (*ensure that a main function exists*) in
-							let _ = print_endline "\nSemantic analysis completed successfully.\nCompiling...\n" in
+let check_program funclist =
+	let (environ : env) = { functions = funclist} in
+		let _loadchecker = numLoad funclist = 1 in 
+			let _loadmain = checkLoad funclist in 
+				let _dovalidation = List.map ( fun(f) -> valid_func environ f) funclist in (*Do the semantic analysis*)
+			 			let _mainexists = exists_main environ (*ensure that a main function exists*) in
+							let _ = print_endline "\nSemantic analysis successfully completed.\nCompiling...\n" in
 								true

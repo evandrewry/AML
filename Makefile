@@ -5,8 +5,7 @@ print
 
 TARFILES = Makefile testall.sh scanner.mll parser.mly \
 	ast.ml compile.ml toplevel.ml \
-	$(TESTS:%=tests/test-%.mc) \
-	$(TESTS:%=tests/test-%.out)
+	$(TESTS:%=tests/)
 
 aml : $(OBJS)
 	ocamlc str.cma unix.cma -o aml $(OBJS) 

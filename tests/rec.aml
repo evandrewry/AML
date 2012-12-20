@@ -1,0 +1,11 @@
+#load-random
+
+main():void{
+	rec();
+}
+
+function rec():void{
+	move_R();
+	move_D();
+	rec();
+}

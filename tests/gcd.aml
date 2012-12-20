@@ -1,4 +1,4 @@
-#load-random
+#load<maze>
 main():void
 {
     integer x := gcd(7,49);

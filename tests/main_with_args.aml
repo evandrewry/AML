@@ -1,4 +1,4 @@
-#load-random
+#load<maze>
 
 main(Integer x):void
 {

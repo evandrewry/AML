@@ -1,0 +1,873 @@
+%% LyX 2.0.0 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[english]{article}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage{subscript}
+
+\makeatletter
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LyX specific LaTeX commands.
+%% Because html converters don't know tabularnewline
+\providecommand{\tabularnewline}{\\}
+
+\makeatother
+
+\usepackage{babel}
+\begin{document}
+
+\title{\textbf{COMS W4115}\\
+\textbf{aML}\\
+Language Reference Manual}
+
+
+\author{Sriramkumar Balasubramanian (\textbf{sb3457})\\
+ Evan Drewry (\textbf{ewd2106})\\
+ Timothy Giel (\textbf{tkg2104})\\
+ Nikhil Helferty (\textbf{nh2407})}
+
+\maketitle
+\pagebreak{}
+
+\tableofcontents{}
+
+\pagebreak{}
+
+
+\section{Introduction}
+
+This manual describes the aML language which is used for manipulating
+mazes and is used to provide instructions to a bot traversing the
+maze. \\
+The manual provides a reliable guide to using the language. While
+it is not the definitive standard, it is meant to be a good interpretation
+of how to use the language. This manual follows the general outline
+of the reference manual referred to in \textquotedblleft{}The C Programming
+Language\textquotedblright{}, but is organized slightly differently
+with definitions specific to aML. The grammar in this manual is the
+standard for this language.
+
+
+\section{Lexical Conventions}
+
+A program consists of a single translation unit stored as a file.
+There are five classes of tokens: \textbf{identifiers}, \textbf{keywords},
+\textbf{constants}, \textbf{operators}, and other separators. White
+space (blanks, tabs, newlines, form feeds, etc.) and comments are
+ignored except as they separate tokens. Some white space is required
+to separate adjacent identifiers, keywords, and constants.
+
+
+\subsection{Comments}
+
+The characters // introduces a single line comment. The rest of the
+line is commented in this case. This differs from a multi-line comment
+which is enclosed by the /{*} and {*}/ characters. Multi-line comments
+do not nest.
+
+
+\subsection{Identifiers}
+
+An identifier is a sequence of letters and digits, beginning with
+a letter and can be of any length. The case of the letters is relevant
+in this case. No other characters can form identifiers. \\
+eg. abcd, Abcd, A123,abc1
+
+
+\subsection{Keywords}
+
+The following identifiers are reserved for use as keywords, and may
+not be used otherwise:-\\
+\\
+\begin{tabular}{ccccccc}
+if & return & display & remove & left & hasleft & integer\tabularnewline
+then & main & print & add & right  & hasright & bool\tabularnewline
+else & void & isSource & head & up  & hastop & list\tabularnewline
+load & function & visited & next & down & hasbottom & cell\tabularnewline
+random & exit & isTarget & isEmpty & CPos &  & \tabularnewline
+true & null & NOT & AND &  &  & \tabularnewline
+false &  &  & OR &  &  & \tabularnewline
+\end{tabular}\\
+\\
+This language consists of many implicit variables and functions increasing
+the size of the reserved words list. There are a few keywords like
+display,null and next whose functionalities are not defined yet. But
+they are reserved for future use.
+
+
+\subsection{Literals}
+
+There are different kinds of literals (or constants) in aML as listed
+below:-
+
+
+\subsubsection{integer Literals}
+
+An integer literal is taken to be decimal, and is of data type integer.
+It may consist only of a sequence of digits 0-9. \\
+eg. 0,1,22,-5
+
+
+\subsubsection{bool Literals}
+
+A bool literal is either \textbf{True} or \textbf{False}, and is of
+data type bool
+
+
+\subsubsection{list Literals}
+
+The list literal can include either the integer, bool, cell or list<datatype>
+types (cascaded lists). \\
+eg. <{[}1{]}>,<{[}1,2,3{]}>,<{[}{[}1,2,3{]},{[}4,5{]}>,<{[}true, false,
+true{]}>\\
+.\\
+As can be seen above the list literals consist of the form list<integer>,
+list<list<....<list<integer>\textcompwordmark{}>...>\textcompwordmark{}>,
+list<bool> or list<list ... <list <bool>\textcompwordmark{}> ... >\textcompwordmark{}>.
+Details on list<datatype> and cell datatypes are provided in section
+\ref{sec:Implicit-variables-and}. \\
+
+
+
+\subsection{Separators}
+
+The semi-colon \textbf{; }and the pair of braces \textbf{\{ \} },
+the < > and {[} {]}, act as separators of the tokens. They are meant
+to reduce ambiguity and conflicts during the parsing phase. The semi-colon
+is added at the end of every statement to signify the end of the logical
+statement. The \{ \} are used to collect groups of statements into
+a single compound statement block. The < > and {[} {]} are used to
+instantiate the list<datatype> variables.
+
+
+\section{Syntax Notation}
+
+In all of the syntactic notation used in this manual, the non-terminal
+symbols are denoted in \textit{italics}, and literal words and characters
+in \textbf{bold. }Alternative symbols are listed on separate lines.
+An optional terminal or non-terminal symbol is indicated by subscripting
+it with 'opt'. \\
+eg. \textit{expression\textsubscript{opt}} denotes an optional expression
+
+
+\section{Identifier interpretation}
+
+aML interprets the identifier based on it's type. Each identifier
+has a storage associated with it where a certain value is stored.
+The type of the identifier determines the meaning of the values located
+in the storage of the identifier. In aML each identifier's storage
+exists as long as the block enclosing the identifier is being executed.\\
+aML supports a 3 fundamental types:-\\
+
+\begin{itemize}
+\item integer - Objects declared as integers use 64 bits for storage and
+are signed. They are primarily used for arithmetic operations.
+\item bool - Objects declared as bools act as binary variables and can either
+take the value \textbf{true} or \textbf{false}.
+\item cell - A cell object stores the attributes of a cell of a maze.
+\end{itemize}
+There is one derived type list<type> which is used for storing lists
+of objects of the fundamental types as well as the list type. By this
+recursive definition, aML allows cascading of these lists.\\
+ More details on the cell and list<type> datatypes is provided in
+section \ref{sec:Types-revisited}.\\
+\\
+The complete data type definitions present in aML are as follows:-\\
+\textit{}\\
+\textit{datatype:-}\textbf{}\\
+\textbf{\hspace*{0.5cm}integer}\\
+\textbf{\hspace*{0.5cm}bool}\\
+\textbf{\hspace*{0.5cm}cell}\\
+\textbf{\hspace*{0.5cm}list<}\textit{datatype>}\\
+\\
+\textbf{Note:- }Each datatype is different from each other and no
+two different datatypes can be combined together in a valid operation
+defined in aML. Therefore there are no type-conversion rules defined
+for aML.
+
+
+\section{Expressions}
+
+The complete syntax is provided in section \ref{sec:Syntax-summary}.
+This section introduces the definition of the expression types which
+are the basic building blocks of any language.
+
+
+\subsection{Primary Expressions}
+
+Primary expressions are identifiers, constants, or expressions in
+parentheses. They also include the variable CPos which will be explained
+in section \ref{sec:Types-revisited}.\\
+\textbf{}\\
+\textit{primary-expression:-}\\
+\textit{\hspace*{0.5cm}identifier}\\
+\textit{\hspace*{0.5cm}literal }\\
+\textit{\hspace*{0.5cm}}( \textit{expression }\textbf{)}\textbf{\textit{}}\\
+\textit{\hspace*{0.5cm}}\textbf{(CPos)}\\
+ \\
+An identifier is a primary expression provided it's type is specified
+in it's declaration.\\
+A literal is a primary expression. The type of the literal may include
+integer, bool or list<type>. The syntax notation for literal including
+the definition of list literals is given in detail in section \ref{sec:Syntax-summary}.
+\\
+A paranthesized expression is a primary expression whose type and
+value are equal to those of the non-paranthesized one. \\
+CPos refers to the current position of the bot in the maze. It is
+a tracking variable and is used primarily to assign values to identifiers
+of cell datatypes. \\
+null is a constant which is assigned by default to identifiers of
+the list<type> and cell datatypes. It signifies no storage allotted
+to the identifier yet.
+
+
+\subsection{Operators}
+
+
+\subsubsection{Arithmetic Operators}
+
+There are six arithmetic operators:\{ +, -, {*}, /, \%, \textasciicircum{}\}.
+The operands of these operators must be of integer data type. The
+result will also be of type integer.\\
+\textbf{}\\
+\textit{arithmetic-expression:-}\\
+\textit{\hspace*{0.5cm}expression + expression }\\
+\textit{\hspace*{0.5cm}expression - expression }\\
+\textit{\hspace*{0.5cm}expression {*} expression }\\
+\textit{\hspace*{0.5cm}expression / expression }\\
+\textit{\hspace*{0.5cm}expression \% expression }\\
+\textit{\hspace*{0.5cm}expression \textasciicircum{} expression }\\
+\\
+\begin{tabular}{|c|c|c|}
+\hline 
+Operator & Semantic & Comments\tabularnewline
+\hline 
+\hline 
++ & addition & \tabularnewline
+\hline 
+- & subtraction & \tabularnewline
+\hline 
+{*} & multiplication & \tabularnewline
+\hline 
+/ & division & integer division only. Divide by zero => error\tabularnewline
+\hline 
+\% & modulo & \tabularnewline
+\hline 
+\textasciicircum{} & exponentiation & \tabularnewline
+\hline 
+\end{tabular}\\
+\\
+
+
+
+\subsubsection{Relational Operators}
+
+The relational operators all return values of bool type (either True
+or False). There are six relational operators: \{==, \textasciitilde{}=,
+>, <, >=, <=\}. The operators all yield \textbf{False} if the specified
+relation is false and \textbf{True} if it is true. \\
+\textbf{}\\
+\textit{relational-expression:-}\\
+\textit{\hspace*{0.5cm}expression}\textbf{\textit{ }}\textbf{== }\textit{expression}\\
+\textit{\hspace*{0.5cm}expression}\textbf{ \textasciitilde{}= }\textit{expression}\\
+\textit{\hspace*{0.5cm}expression}\textbf{ > }\textit{expression}\\
+\textit{\hspace*{0.5cm}expression}\textbf{ < }\textit{expression}\\
+\textit{\hspace*{0.5cm} expression}\textbf{ >= }\textit{expression}\\
+\textit{\hspace*{0.5cm}expression}\textbf{ <= }\textit{expression}\\
+\\
+\begin{tabular}{|c|c|}
+\hline 
+Operator & Semantic\tabularnewline
+\hline 
+\hline 
+== & equals\tabularnewline
+\hline 
+\textasciitilde{}= & not equals\tabularnewline
+\hline 
+> & greater\tabularnewline
+\hline 
+< & lesser\tabularnewline
+\hline 
+>= & greater than equals\tabularnewline
+\hline 
+<= & less than equals\tabularnewline
+\hline 
+\end{tabular}\\
+\\
+The \textbf{==} operator compares the value of left expression to
+the right expression and evaluates to True if they are equal, False
+otherwise. It is vice-versa for the \textbf{\textasciitilde{}= }operator.
+The \textbf{> }operator evaluates to true if the left expression is
+greater than the right expression, false otherwise. The \textbf{<
+}operator behaves in the opposite manner. The \textbf{>= }and \textbf{<=
+}operators check for equality condition as well. \\
+For the == and \textbf{\textasciitilde{}= }operators, the expressions
+involved must be of the same datatype. The other operators are defined
+only for the integer datatype where comparison is meaningful. For
+the cell datatype, the == and \textasciitilde{}= compare the cell
+location in the map to which both the operands point to. As for the
+list<type> datatype, the two operators check if two variables referencing
+list datatypes point to the same list object.\\
+
+
+
+\subsubsection{bool Operators}
+
+The bool operators all return values of bool type (either True or
+False). There are three bool operators: logical-NOT, logical-AND and
+logical-OR, denoted by NOT, AND, and OR, respectively. \\
+\textbf{}\\
+\textit{not-expression:-}\\
+\textit{\hspace*{0.5cm}}\textbf{NOT}\textit{ expression}\\
+\textit{and-expression:-}\\
+\textit{\hspace*{0.5cm}expression }\textbf{AND}\textit{ expression}\\
+\textit{or-expression:-}\\
+\textit{\hspace*{0.5cm}expression }\textbf{OR}\textit{ expression}\\
+\\
+The operand(s) to NOT, AND and OR have to evaluate to True or False,
+or in other words, they must either be bool variables or relational
+expressions. NOT negates the operand, AND returns True if all operands
+evaluate to true, False otherwise. OR returns True if at least one
+of the operands evaluate to true, False otherwise.
+
+
+\subsubsection{Assignment Operators}
+
+There is a single assignment operator in aML, \textbf{:=,} which does
+simple assignment. It is a binary operator which assigns the value
+of the right operand to the storage of the left operand.\\
+\\
+\textit{assignment-expression:-}\\
+\textit{\hspace*{0.5cm}identifier }\textbf{:=}\textit{ expression}\\
+\textit{}\\
+The type of the expression must be identical to the type of 'lvalue'.
+
+
+\subsubsection{Associative Operator}
+
+The \textbf{. }operator is used for function calls on variables represented
+by identifiers. The structure of statements involving the operator
+is shown in section\ref{sec:Syntax-summary}.
+
+
+\section{Declarations}
+
+Declarations specify the interpretation given to each identifier i.e.
+the type of data it can point to and the associated operations that
+go along with it. Declarations can be divided into variable and function
+declarations. Variable declarations refers to the declaration of identifiers
+whose type belongs to one of the datatypes mentioned and is different
+from function declarations both syntactically and semantically.
+
+
+\subsection{Variable Declarations\label{sub:Variable-Declarations}}
+
+The rule representing the declaration of identifiers is listed in
+the complete Syntax summary in section \ref{sec:Syntax-summary}.
+The declaration of identifiers is similar to many strongly typed languages
+where thet type associated with the identifier must be specified during
+declaration. In aML variable declaration is allowed only at the beginning
+of the main method and other functions. Without any loss of generality
+variable declaration is not allowed to intermix with statements and
+also it is encourage that while declaring variables at the top, they
+are assigned to literal values initally, or function calls, but not
+other variables. They can be assigned to subsequent variables using
+assignment statements in the body of the function.\\
+\\
+\textit{declaration-expression:-}\\
+\textit{\hspace*{0.5cm}datatype identifer := literal }\\
+\textit{\hspace*{0.5cm}datatype identifier := }\textbf{(CPos)}\textit{
+}\\
+\textit{\hspace*{0.5cm}datatype identifier := lang\_functions}\\
+\\
+\\
+Examples of some declarations are given below:-
+\begin{itemize}
+\item integer x;
+\item bool flag;
+\item cell node;
+\item list<integer> mylist;
+\end{itemize}
+
+\subsection{Variable Initialization\label{sub:Variable-Initialization}}
+
+When an identifier is declared, an initial value must also be specified.
+The identifier can be re-initalized after it's declaration using assignment
+statements. \\
+ \textit{}\\
+\textit{init-expression:-}\\
+\textit{\hspace*{0.5cm}identifier} \textbf{:=} \textit{expression}\\
+\\
+Care must be taken to ensure that the identifer's type must be consistent
+with the type of the expression.\\
+
+
+A few examples of variable initializations are provided below;
+\begin{itemize}
+\item x := 10;
+\item flag := false;
+\item node := null;
+\item mylist.head() := 1;
+\end{itemize}
+The exact rule is provided in the Syntax summary in section \ref{sec:Syntax-summary}.
+Initialization can also be combined with declaration in a single step.
+This is also shown in final section.
+
+
+\subsection{Function Declaration}
+
+Functions can either return a certain datatype or be void functions
+(return no value). A function header is specified with the \textbf{function
+}keyword and an identifier along with an optional argument list and
+return type. Functions can be {}``used'' by function calls. But
+for a function to be called, it must be declared in the program.\\
+\\
+\textit{function\_declaration:-}\\
+\textit{\hspace*{0.5cm}function\_header}\textbf{ \{ }\textit{vdecl\_list
+body}\textbf{ \}}\\
+\textbf{}\\
+\textit{function\_header:-}\\
+\textit{\hspace*{0.5cm}}\textbf{function}\textit{ identifier (args\_list\textsubscript{\textbf{opt}})}\textbf{
+: }\textit{return\_type}\\
+\textit{}\\
+\textit{args\_list:-}\\
+\textit{\hspace*{0.5cm}datatype identifier}\\
+\textit{\hspace*{0.5cm}datatype identifier}\textbf{,}\textit{ args\_list}\\
+\textit{}\\
+\textit{vdecl:}\\
+\textit{\hspace*{0.5cm}datatype identifier := litera}\\
+\textit{\hspace*{0.5cm}datatype identifier := }\textbf{(CPos)}\textit{
+}\\
+\textit{\hspace*{0.5cm}datatype identifier := lang\_functions}\\
+\textit{}\\
+\textit{vdecl\_list:}\\
+\textit{\hspace*{0.5cm}empty declaration}\\
+\textit{\hspace*{0.5cm}vdecl vdecl\_list}\\
+\textit{}\\
+\textit{body:-}\\
+\textit{\hspace*{0.5cm}compound-statement}\textbf{}\\
+\textbf{}\\
+\textbf{}\\
+Function calls are handled in section \ref{sec:Syntax-summary}. Compound
+statements are described in detail in the section below. \\
+Since function calls are part of compound statements, aML allows recursive
+functions, which is necessary owing to the absence of any looping
+constructs in this language. Also compound-statements do not allow
+function definitions, so functions cannot be declared within functions.
+
+
+\section{Statements}
+
+Statements are usually executed in sequence, with the exception of
+conditional statements. They are the next level of basic building
+blocks after expressions. Each statement ends with a semi-colon at
+the end which denotes the end of the logical statement. The physical
+statement which is equivalent to one line in the editor may be comprised
+of one or more logical statements.\\
+One notable feature in aML is the lack of looping constructs. Iterations
+are achieved by tail recursion of functions. The function definition
+shown above is represented in the bigger picture in section \ref{sub:Program-Definition}.
+The following definition gives an idea about the components of a statement.
+The entire definition integrated with other definitions is present
+in section \ref{sec:Syntax-summary}.
+
+
+\subsection{Expression statement}
+
+\textit{expression-statement:- }\\
+\textit{\hspace*{0.5cm}expression}\textbf{;}\textit{ }\\
+Expression statement consist of assignments and function calls. 
+
+
+\subsection{Compound statements}
+
+Compound statements are provided in the form:-\\
+\\
+ \textit{compound-statement:-}\\
+\textit{\hspace*{0.5cm}}\textbf{\{ }\textit{statement-list }\textbf{\}}\textit{}\\
+\textit{statement-list:-}\\
+\textit{\hspace*{0.5cm}statement }\\
+\textit{\hspace*{0.5cm}statement statement-list }\\
+Compound statements are generally used to form the body of code to
+execute in conditional statements, as well as the body of function
+definitions.
+
+
+\subsection{Conditional statements}
+
+Conditional statements have the general form:-\\
+\\
+ \textit{conditional-statement:-}\textbf{}\\
+\textbf{\hspace*{0.5cm}if }\textit{(expression)}\textbf{ then \{}\textit{compound-statement}\textbf{\};}\\
+\textbf{\hspace*{0.5cm}if (}\textit{expression}\textbf{) then \{}\textit{compound-statement}\textbf{\}else
+\{}\textit{compound statement}\textbf{\}}\\
+\\
+ The else branch is optional. The program will evaluate the expression
+in parentheses, and if it evaluates to the bool value true then it
+executes the corresponding compound-statement, and subsequently continues
+on to the statement following the conditional statement. If the expression
+does not evaluate to true, then the compound-statement following the
+else branch is executed (if it exists). Branches are evaluated in
+order, such that only the first branch with an expression that evaluates
+to true will be executed, and all others skipped.
+
+
+\subsection{Return statement}
+
+Return statement Return statements take the form:-\\
+\textit{return-statement:- }\\
+\textit{\hspace*{0.5cm}}\textbf{return }\textit{expression}\textbf{;}\\
+The expression should evaluate to a value of the return type of the
+function being defined. 
+
+
+\section{Scope rules}
+
+Programs are not multi-file in AML, so external scope is not a worry.
+The lexical scope of identifers is of relevance however. In brief,
+subsequent to declaration a given identifier is valid for the rest
+of the function inside which it was declared. Re-declarations using
+an already declared identifier are not permitted. No identifiers can
+be declared outside functions. \\
+While user-defined variables cannot enjoy a global scope, the implicit
+variables on the other-hand can do so. More information on implicit
+variables is provided in \ref{sec:Implicit-variables-and}.
+
+
+\section{Preprocessor directives}
+
+Preprocessor directives must precede any code in the program. One
+possible preprocessor directive takes the form: \textbf{\#load filename}.
+This instruction ensures that the maze to be navigated is to be generated
+from the file with name \textbf{filename}. (The file must be placed
+in the 'maps' directory). The acceptable file format is pre-defined
+and is independent of the language used. \\
+Another possible directive is: \textbf{\#load-random}. This leads
+to the maze is to be randomly generated each time the program runs.
+\\
+The two directives are mutually exclusive. In the event of multiple
+directives, the compiler will show an error. 
+
+
+\section{Implicit identifiers and functions\label{sec:Implicit-variables-and}}
+
+aML consists of many implicit identifers or variables and functions.
+By implicit, it follows that these identifiers can be used without
+prior declaration as is the case for any user defined identifier or
+function. However they cannot be modified by the user. Their usage
+is mostly restricted to bool queries and assigning their values to
+user-defined identifiers. The variables and functions along with their
+meaing are provided below:-\\
+
+
+
+\subsection{Variables}
+
+The implicit variables are as follows.\\
+
+\begin{itemize}
+\item CPos - denotes the current position of the bot on the maze. Variables
+of type cell can be instantiated by referencing CPos.
+\item Visited - It is a dictionary like structure which maintains the 'visited'
+status of each cell of the maze. It is used especially for backtracking
+algorithms. It can never be used. The Visit() function provided accesses
+this data structure inherently.
+\end{itemize}
+
+\subsection{Functions}
+
+The implicit functions mainly deal with the movement and functionalities
+of the bot. \\
+
+\begin{itemize}
+\item move\_U() - moves the bot one cell up from the current position, returns
+true if it succeeds, false otherwise
+\item move\_D() - moves the bot one cell down from the current position,
+returns true if it succeeds, false otherwise
+\item move\_L() - moves the bot one cell left of the current position, returns
+true if it succeeds, false otherwise
+\item move\_R() - moves the bot one cell right of the current position,
+returns true if it succeeds, false otherwise
+\item revert() - goes back to the previous position from the current position,
+returns true if successful, false if at the start
+\item visited(id) - checks if the cell refered to by id has been visited
+or not
+\end{itemize}
+
+\section{Types revisited\label{sec:Types-revisited}}
+
+This section discusses the list<datatype> datatype and the functions
+associated with it. These two datatypes are in a sense less primitive
+than the integer and bool datatypes. They come along with certain
+functions which can be applied to variables belonging to these datatypes.
+These functions are invoked or called using the \textbf{. }associative
+operator on the identifier. The rule regarding the functions is shown
+in the final section.
+
+
+\subsection{list<datatype>}
+
+The list<datatype> from it's definition in section\ref{sub:Variable-Declarations}
+allows cascaded lists. This is especially useful for adjacency list
+representation of graphs from mazes.\\
+The functions associated with the datatype allow the manipulation
+and traversal of the lists.\\
+
+\begin{itemize}
+\item add() - adds an elements to the end of the current list\\
+eg. mylist.add(2);
+\item remove() - removes and returns the first element of the current list\\
+eg. mylist.remove();
+\item isEmpty() - returns true if the current list has no elements, false
+otherwise. \\
+eg. mylist.isEmpty()
+\item head() - returns the first element of the current list\\
+eg. mylist.head();
+\end{itemize}
+
+\subsection{cell}
+
+The cell datatype is unique in the sense that it cannot be set a user-defined
+value. At any point of time, a variable of cell dataype can be assigned
+only to the CPos value. It can however be stored in a variable which
+will reflect that CPos value then, even if accessed at a later time.
+\\
+Certain functions are provided for this datatype which makes querying
+the cell's content as well as it's neighborhood easier.
+
+
+\subsubsection{Neighborhood functions}
+\begin{itemize}
+\item left() - returns the left cell of the current cell if it exists and
+the current cell has been visited
+\item hasleft() - returns True if there is a cell to the left of the current
+cell
+\item right() - returns the right cell of the current cell if it exists
+and the current cell has been visited
+\item hasright() - returns True if there is a cell to the right of the current
+cell
+\item up() - returns the cell located upwards of the current cell if it
+exists and the current cell has been visited
+\item hasTop() - returns True if there is a cell to the top of the current
+cell
+\item down() - returns the cell located downwards of the current cell if
+it exists and the current cell has been visited
+\item hasbottom() - returns True if there is a cell to the bottom of the
+current cell
+\end{itemize}
+
+\subsubsection{cell functions}
+\begin{itemize}
+\item isTarget(id) - returns true if the cell is a target as specified in
+the maze
+\item isSource(id) - returns true if the cell is the start point of the
+maze
+\item get\_Loc(id) - returns the integer ID of the cell
+\end{itemize}
+Here id refers to an identifer pointing to a cell datatype.
+
+
+\section{Syntax summary\label{sec:Syntax-summary}}
+
+The entire syntax is provided below. This section is intended for
+the logical understanding of the language structure rather than an
+exact copy of the language.\\
+
+
+
+\subsection{Expressions}
+
+The expression includes declaration statements as well.\\
+\\
+\textit{expression:-}\\
+\textit{\hspace*{0.5cm}primary\_expression}\\
+\textit{\hspace*{0.5cm}lval\_expression}\textbf{}\\
+\textbf{\hspace*{0.5cm}NOT }\textit{expression}\\
+\textit{\hspace*{0.5cm}expression binop expression}\\
+\textit{\hspace*{0.5cm}functions}\\
+\textit{}\\
+\textit{primary-expression:-}\\
+\textit{\hspace*{0.5cm}identifier}\\
+\textit{\hspace*{0.5cm}literal }\\
+\textit{\hspace*{0.5cm}}( \textit{expression }\textbf{)}\textbf{\textit{}}\\
+\textit{\hspace*{0.5cm}}\textbf{(CPos)}\\
+\textbf{}\\
+\textit{literal:-}\\
+\textit{\hspace*{0.5cm}primitive\_literal}\\
+\textit{\hspace*{0.5cm}}\textbf{<{[}}\textit{list\_literal\textsubscript{opt}}\textbf{{]}>}\textit{}\\
+\textit{}\\
+\textit{primitive\_literal:-}\\
+\textit{\hspace*{0.5cm}integer\_literal}\\
+\textit{\hspace*{0.5cm}bool\_literal}\\
+\textit{}\\
+\textit{list\_literal:-}\\
+\textit{\hspace*{0.5cm}sub\_list}\\
+\textit{\hspace*{0.5cm}}\textbf{{[}}\textit{list\_literal}\textbf{{]}}\textit{}\\
+\textit{\hspace*{0.5cm}list\_literal,}\textbf{{[}}\textit{sub\_list}\textbf{{]}}\textit{}\\
+\textit{}\\
+\textit{sub\_list:-}\\
+\textit{\hspace*{0.5cm}primitive\_literal}\\
+\textit{\hspace*{0.5cm}primitive\_literal,sub\_list}\\
+\textit{}\\
+\textit{init-expression:-}\\
+\textit{\hspace*{0.5cm}declarator := expression}\\
+\textbf{}\\
+\textit{datatype:-}\textbf{}\\
+\textbf{\hspace*{0.5cm}integer}\\
+\textbf{\hspace*{0.5cm}bool}\\
+\textbf{\hspace*{0.5cm}cell}\\
+\textbf{\hspace*{0.5cm}list<}\textit{datatype}\textbf{>}\\
+\textbf{}\\
+\textit{binop:-}\textbf{}\\
+
+
+\begin{tabular}{|cccc|c|}
+\hline 
+ & Operators &  &  & Associativity\tabularnewline
+\hline 
+\hline 
+\textasciicircum{} &  &  &  & Right\tabularnewline
+\hline 
+/ & {*} & \% &  & Left\tabularnewline
+\hline 
+> & < & >= & <= & Left\tabularnewline
+\hline 
+== & \textasciitilde{}= &  &  & Left\tabularnewline
+\hline 
+NOT &  &  &  & Right\tabularnewline
+\hline 
+AND &  &  &  & Left\tabularnewline
+\hline 
+OR &  &  &  & Left\tabularnewline
+\hline 
+:= &  &  &  & Right\tabularnewline
+\hline 
+\end{tabular}\\
+\\
+The binop table shows the binary operators in the decreasing order
+of precedence (top - bottom) along with their associativity which
+gives the fashion in which they are grouped together.\\
+\\
+\textit{functions:-}\\
+\textit{\hspace*{0.5cm}list\_functions}\\
+\textit{\hspace*{0.5cm}cell\_functions}\\
+\textit{\hspace*{0.5cm}maze\_functions}\\
+\textit{\hspace*{0.5cm}lang\_functions}\\
+\textit{}\\
+\textit{list\_functions:-}\textbf{}\\
+\textbf{\hspace*{0.5cm}}\textit{identifier}\textbf{.remove()}\\
+\textbf{\hspace*{0.5cm}}\textit{identifier}\textbf{.isEmpty()}\\
+\textbf{\hspace*{0.5cm}}\textit{identifier}\textbf{.head()}\\
+\textbf{}\\
+\textit{cell\_functions:-}\textbf{}\\
+\textbf{\hspace*{0.5cm}}\textit{identifier}\textbf{.left()}\\
+\textbf{\hspace*{0.5cm}}\textit{identifier}\textbf{.right()}\\
+\textbf{\hspace*{0.5cm}}\textit{identifier}\textbf{.up()}\\
+\textbf{\hspace*{0.5cm}}\textit{identifier}\textbf{.down()}\\
+\textbf{\hspace*{0.5cm}}\textit{identifier}\textbf{.hasleft()}\\
+\textbf{\hspace*{0.5cm}}\textit{identifier}\textbf{.hasright()}\\
+\textbf{\hspace*{0.5cm}}\textit{identifier}\textbf{.hastop()}\\
+\textbf{\hspace*{0.5cm}}\textit{identifier}\textbf{.hasbottom()}\\
+\textbf{\hspace*{0.5cm}isTarget(}\textit{identifier}\textbf{)}\\
+\textbf{\hspace*{0.5cm}isSource(}\textit{identifier}\textbf{)}\\
+\textbf{}\\
+\textbf{}\\
+\textit{maze\_functions:-}\\
+\textit{\hspace*{0.5cm}}\textbf{visited}(\textit{identifier}\textbf{)}\\
+\textbf{\hspace*{0.5cm}get\_Loc(}\textit{identifier}\textbf{)}\\
+\textit{}\\
+\textit{lang\_functions:-}\\
+\textit{\hspace*{0.5cm}identifier}\textbf{(}\textit{actual\_args\textsubscript{\textbf{opt}}}\textbf{)}\\
+\textbf{}\\
+\textit{actual\_args:-}\\
+\textit{\hspace*{0.5cm}primary\_expression}\\
+\textit{\hspace*{0.5cm}primary\_expression}\textbf{, }\textit{actual\_args}\textbf{}\\
+\textbf{}\\
+
+
+
+\subsection{Statements}
+
+Statements are logical sentences that can be formed by the language.
+A compound statement is a group of statements occuring in a linear
+fashion one after the other.\\
+\textit{compound-statement}:\textbf{-}\\
+\textbf{\hspace*{0.5cm}\{}\textit{statement-list}\textbf{\}}\\
+\textbf{}\\
+\textit{statement-list:-}\\
+\textit{\hspace*{0.5cm}statement}\\
+\textit{\hspace*{0.5cm}statement statement-list}\\
+\textit{}\\
+\textit{statement:-}\textbf{}\\
+\textbf{\hspace*{0.5cm}}\textit{expression}\textbf{;}\\
+\textbf{\hspace*{0.5cm}return }\textit{expression}\textbf{;}\\
+\textbf{\hspace*{0.5cm}\{ }\textbf{\textit{statement-list}}\textbf{
+\}}\\
+\textbf{\hspace*{0.5cm}if (}\textit{expression}\textbf{) }\textit{statement}\textbf{;}\\
+\textbf{\hspace*{0.5cm}if (}\textit{expression}\textbf{) }\textit{statement}\textbf{
+else }\textit{statement}\textbf{}\\
+\textbf{\hspace*{0.5cm}exit();}\\
+\textbf{\hspace*{0.5cm}print(}\textit{expression}\textbf{);}\\
+\textbf{\hspace*{0.5cm}}\textit{move\_functions}\textbf{;}\\
+\textbf{\hspace*{0.5cm}}\textit{lang\_functions}\textbf{;}\\
+\textbf{\hspace*{0.5cm}}\textit{identifier}\textbf{.add(}\textit{expression}\textbf{);}\\
+\textit{}\\
+\textit{}\\
+\textit{move\_functions:-}\textbf{}\\
+\textbf{\hspace*{0.5cm}move\_To(}\textit{identifier}\textbf{)}\\
+\textbf{\hspace*{0.5cm}move\_U()}\textit{}\\
+\textbf{\hspace*{0.5cm}move\_D()}\textit{}\\
+\textbf{\hspace*{0.5cm}move\_L()}\textit{}\\
+\textbf{\hspace*{0.5cm}move\_R()}\textit{}\\
+\textbf{\hspace*{0.5cm}revert()}\textit{}\\
+\textbf{}\\
+\\
+If the expression to 'if' does not evaluate to True or False, an error
+will be thrown. 
+
+
+\subsection{Program Definition\label{sub:Program-Definition}}
+
+This subsection describes the structure of the program and functions
+which are the biggest building blocks in aML. Every aML must have
+one and only one main function through which the control passes to
+the program. It must also have exactly one pre-processor directive
+to load the maze. It can have an arbitrary number of functions though.
+The program structure is defined below:-\\
+\\
+\textit{program:-}\\
+\textit{\hspace*{0.5cm}empty\_program}\\
+\textit{\hspace*{0.5cm}pre-process program}\\
+\textit{\hspace*{0.5cm}func-def program}\\
+\textit{}\\
+\textit{\hspace*{0.5cm}}\\
+\textit{pre-process:-}\textbf{}\\
+\textbf{\hspace*{0.5cm}\#load-}\textit{identifier}\textbf{}\\
+\textbf{\hspace*{0.5cm}\#load-random}\\
+\textbf{}\\
+func-def:-\textbf{}\\
+\textbf{\hspace*{0.5cm}main():void \{}\textit{vdecl\_list statement-list}\textbf{\}}\\
+\textbf{\hspace*{0.5cm}function}\textit{ identifier}\textbf{(}\textit{formal-args\textsubscript{\textbf{opt}}}\textbf{):}\textit{return-type}\textbf{\{}\textit{vdecl\_list
+statement-list}\textbf{\}}\\
+\textbf{}\\
+\textit{formal-args\textsubscript{\textbf{opt}}:-}\\
+\textit{\hspace*{0.5cm}datatype identifier}\\
+\textit{\hspace*{0.5cm}datatype identifier}\textbf{,}\textit{formal-args}\textbf{\textit{}}\\
+\textbf{\textit{}}\\
+\textit{return-type:-}\\
+\textit{\hspace*{0.5cm}datatype}\textbf{}\\
+\textbf{\hspace*{0.5cm}void}\\
+\textbf{}\\
+\textit{}\\
+\textit{vdecl:}\\
+\textit{\hspace*{0.5cm}datatype identifier := literal}\\
+\textit{\hspace*{0.5cm}datatype identifier := }\textbf{(CPos)}\textit{
+}\\
+\textit{\hspace*{0.5cm}datatype identifier := lang\_functions}\\
+\textit{}\\
+\textit{vdecl\_list:}\\
+\textit{\hspace*{0.5cm}empty declaration}\\
+\textit{\hspace*{0.5cm}vdecl vdecl\_list}\\
+\textit{}\\
+
+\end{document}

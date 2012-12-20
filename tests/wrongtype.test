@@ -1,0 +1,6 @@
+#!/bin/bash
+
+DESC="wrong type"
+OUT=""
+ERR=""
+COMPILE_ONLY=true

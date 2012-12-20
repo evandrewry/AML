@@ -12,6 +12,6 @@ let translate funcs prog_name =
 							Sys.command (Printf.sprintf "javac %s.java" prog_name) in
 								match proc_status with
 					 				 0 ->  "Compilation successful\n"
-							 		| _ -> "\nCompilation of Java bytecode unsuccessful!\n" ^
-													Printf.sprintf "Javac Process Return Code: %i\n" proc_status ^
-													Printf.sprintf "Compilation Command: javac %s.java\n" prog_name
+							 		| _ -> "\nCompilation into Java bytecode unsuccessful!\n" ^
+													Printf.sprintf "Javac Process Code: %i\n" proc_status ^
+													Printf.sprintf "Compilation: javac %s.java\n" prog_name

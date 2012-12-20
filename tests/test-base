@@ -62,7 +62,7 @@ function run() {
         java $1 >log_stdout 2>log_stderr
     else
         java $1 >log_stdout 2>log_stderr &
-        sleep 2
+        sleep 3
         kill $!
     fi
     cd ..

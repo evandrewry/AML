@@ -1,0 +1,6 @@
+#!/bin/bash
+
+DESC="bfs algorithm"
+OUT=""
+ERR=""
+GUITEST=true

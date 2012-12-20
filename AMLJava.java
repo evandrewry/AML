@@ -38,8 +38,8 @@ public class AMLJava extends JFrame
             File mazeFile  = new File(mazeFileName);
             try {
                 Scanner scan = new Scanner(mazeFile);
-                width = scan.nextInt();
                 height = scan.nextInt();
+                width = scan.nextInt();
                 maze = new Cell[height][width];
                 for (int row = 0; row < height; row++) {
                     for (int col = 0; col < width; col++) {
@@ -74,7 +74,7 @@ public class AMLJava extends JFrame
             for (int col = 0; col < width; col++) {
                 if (maze[row][col] == null) {
                     double prob = Math.random();
-                    if (prob < .3) maze[row][col] = new Cell(1, row, col);
+                    if (prob < .5) maze[row][col] = new Cell(1, row, col);
                     else maze[row][col] = new Cell(0, row, col);
                 }
             }

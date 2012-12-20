@@ -1,0 +1,51 @@
+#load<maze>
+
+main():void{
+	DFS();
+} 
+
+function DFS():void{
+	cell node := (CPos);
+	
+	if (isTarget(node)){
+		exit();
+	};
+	
+	if(myvisited(node)){
+		DFS();
+	}
+	else{
+		if (isSource(node)){
+			exit();
+		};
+
+		revert();
+		DFS();
+	}
+}
+
+
+function myvisited(cell node):bool{
+	if (node.hasleft() AND NOT visited(node.left())){
+		move_L();
+	}
+	else{
+		if(node.hastop() AND NOT visited(node.up())){
+			move_U();
+		}
+		else{
+			if (node.hasright() AND NOT visited(node.right())) {
+				move_R();
+			}
+			else{
+				if(node.hasbottom() AND NOT visited(node.down())){
+					move_D();
+				}
+				else{
+					return false;
+				}
+			}
+		}
+	}
+	return true;
+}

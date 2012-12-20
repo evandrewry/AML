@@ -87,7 +87,9 @@ vdecl_list:
 |  vdecl_list vdecl { $2 :: $1 }
 
 vdecl:
- data_type ID ASSIGN expr STMTEND { Define($1,$2,$4) }
+ data_type ID ASSIGN vars STMTEND { Define($1,$2,Vars($4)) }
+| data_type ID ASSIGN LPAREN CUR_POS RPAREN  STMTEND { Define($1,$2,Pointer) }
+| data_type ID ASSIGN ID LPAREN actual_args RPAREN  STMTEND { Define($1,$2,Funcall($4,List.rev $6)) }
 
 stmt_list:
   stmt { [$1] }

@@ -1,0 +1,11 @@
+#load-random
+
+main():void{
+	fn(1);
+}
+
+function fn(integer n):integer{
+	return 1;
+	n := 2;
+	return 3;
+}

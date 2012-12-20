@@ -1,0 +1,6 @@
+#!/bin/bash
+
+DESC="dead code; multiple returns"
+OUT=""
+ERR=""
+COMPILE_ONLY=true

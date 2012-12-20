@@ -1,0 +1,5 @@
+#load<maze>
+
+main():void{
+	exit();
+}

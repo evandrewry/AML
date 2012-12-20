@@ -1,0 +1,11 @@
+#load-random
+
+main():void
+{
+	bool x := fn();
+	exit();
+}
+
+function fn():bool{
+	return 1;
+}

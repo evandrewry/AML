@@ -1,0 +1,50 @@
+#load<maze>
+
+main():void{
+	list<cell> toGo := <[]>;
+	cell node := (CPos);
+	toGo.add(node);
+	BFS(toGo);
+}
+
+function BFS (list<cell> toGo):void{
+	cell node := (CPos);
+	if(NOT toGo.isEmpty()){
+		node := toGo.remove();
+		if (isTarget(node)){
+			move_To(node);
+			toGo.clear();
+			exit();
+		};
+		if (visited(node) AND NOT isSource(node)){
+			BFS(toGo);
+		}
+		else{
+			move_To(node);
+			addToGo(node, toGo);
+			revert();
+			BFS(toGo);
+		}
+	};
+	
+}
+
+function addToGo(cell node, list<cell> toGo):void{
+	cell tempNode := (CPos);
+	if (node.hasleft()){
+		tempNode := node.left();
+		toGo.add(tempNode);
+	};
+	if (node.hastop()){
+		tempNode := node.up();
+		toGo.add(tempNode);
+	};
+	if (node.hasright()){
+		tempNode := node.right();
+		toGo.add(tempNode);
+	};
+	if (node.hasbottom()){
+		tempNode := node.down();
+		toGo.add(tempNode);
+	};
+}
