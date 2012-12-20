@@ -1,0 +1,6 @@
+#!/bin/bash
+
+DESC="dumb bot only goes right"
+OUT=""
+ERR=""
+GUITEST=true

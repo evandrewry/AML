@@ -1,5 +1,5 @@
 #!/bin/bash
 
 DESC="factorial algorithm"
-OUT=""
+OUT="3628800"
 ERR=""
